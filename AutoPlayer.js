@@ -6,11 +6,13 @@ class AutoPlayer {
     autoChristmas = true;
     autoForce = true;
     autoGarden = false; // Got the 1000-plant achievement. The next stage of auto-gardening will be more involved, if we get there.
+    autoGodzamok = true;
 
     #running;
     #fastLoopTimeout;
     #fiveSecondLoopTimeout;
     #fifteenMinuteLoopTimeout;
+    #godzamokLoopTimeout;
 
 
     constructor() {
@@ -32,6 +34,7 @@ class AutoPlayer {
         this.#fastLoop();
         this.#fiveSecondLoop();
         this.#fifteenMinuteLoop();
+        this.#godzamokLoop();
     }
 
 
@@ -43,6 +46,7 @@ class AutoPlayer {
         clearTimeout(this.#fastLoopTimeout);
         clearTimeout(this.#fiveSecondLoopTimeout);
         clearTimeout(this.#fifteenMinuteLoopTimeout);
+        clearTimeout(this.#godzamokLoopTimeout);
     }
 
 
@@ -94,6 +98,22 @@ class AutoPlayer {
         }
 
         this.#fifteenMinuteLoopTimeout = setTimeout(this.#fifteenMinuteLoop.bind(this), 900000);
+    }
+
+
+    #godzamokLoop() {
+        this.#log('Godzamok Loop: Firing');
+
+        if (!this.#running) {
+            this.#log('Godzamok Loop: AutoPlayer is not running. Returning.');
+            return;
+        }
+
+        if (this.autoGodzamok)
+            this.#triggerGodzamok();
+
+        // Godzamok lasts 10 seconds, and we really want to rinse it, so timeout for 10.5s
+        this.#godzamokLoopTimeout = setTimeout(this.#godzamokLoop.bind(this), 10500);
     }
 
 
@@ -174,6 +194,36 @@ class AutoPlayer {
 
         plantButton.click();
         tile.click();
+    }
+
+
+    // Godzamok gives a big click-boost for selling lots of buildings in one go
+    // It's massively profitable, and combined with click-frenzies it actually solves the game
+    // We will continually re-trigger it, so we get the boost with and without golden cookies
+    #triggerGodzamok() {
+        // Sell all farms
+        document.getElementById('storeBulkSell').click(); // Go into sell mode
+        document.getElementById('storeBulkMax').click();  // Switch to sell-all mode
+        document.getElementById('product2').click();      // Sell all farms, triggering +850% on clicks
+
+        // Buy farms back to 860. This makes a small profit under normal circumstances
+        document.getElementById('storeBulkBuy').click();  // Go back to buy mode
+        document.getElementById('storeBulk100').click();  // Switch to buy-100 mode
+        document.getElementById('product2').click();      // 100...
+        document.getElementById('product2').click();      // 200...
+        document.getElementById('product2').click();      // 300...
+        document.getElementById('product2').click();      // 400...
+        document.getElementById('product2').click();      // 500...
+        document.getElementById('product2').click();      // 600...
+        document.getElementById('product2').click();      // 700...
+        document.getElementById('product2').click();      // 800!
+        document.getElementById('storeBulk10').click();   // Switch to buy-10 mode
+        document.getElementById('product2').click();      // 810...
+        document.getElementById('product2').click();      // 820...
+        document.getElementById('product2').click();      // 830...
+        document.getElementById('product2').click();      // 840...
+        document.getElementById('product2').click();      // 850...
+        document.getElementById('product2').click();      // 860!
     }
 
 
