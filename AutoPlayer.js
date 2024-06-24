@@ -108,9 +108,13 @@ class AutoPlayer {
 
     // Shimmers are golden cookies and reindeer. We want to auto-click both.
     #clickShimmers() {
-        const shimmers = document.getElementById('shimmers').children;
-        for (const shimmer of shimmers)
-            shimmer.click();
+        let shimmers = document.getElementById('shimmers').children;
+        if (shimmers.length)
+            this.#log('Clicking shimmers! There are ' + shimmers.length + ' shimmers.');
+        while (shimmers.length) {
+            shimmers.item(0)?.click();
+            shimmers = document.getElementById('shimmers').children;
+        }
     }
 
 
