@@ -78,9 +78,9 @@ class AutoPlayer {
     }
 
 
-    // Magic Meter will read something like "51/121 (+0.03/s)"
+    // Magic Meter will read something like "51/121 (+0.03/s)" or "121/121"
     // It fills faster the fuller it is, so we want to wait until we're at max magic to cast anything
-    static #MAGIC_REGEX = /^(?<magic>\d+)\/(?<maxMagic>\d+) .*$/;
+    static #MAGIC_REGEX = /^(?<magic>\d+)\/(?<maxMagic>\d+).*$/;
 
     #forceTheHandOfFate() {
         const magicMeterText = document.getElementById('grimoireBarText')?.innerText || '';
