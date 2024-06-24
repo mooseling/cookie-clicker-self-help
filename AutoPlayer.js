@@ -78,7 +78,16 @@ class AutoPlayer {
     }
 
 
+    // Magic Meter will read something like "51/121 (+0.03/s)"
+    // It fills faster the fuller it is, so we want to wait until we're at max magic to cast anything
+    static #MAGIC_REGEX = /^(?<magic>\d+)\/(?<maxMagic>\d+) .*$/;
+
     #forceTheHandOfFate() {
+        const magicMeterText = document.getElementById('grimoireBarText')?.innerText || '';
+        const {magic, maxMagic} = magicMeterText.match(AutoPlayer.#MAGIC_REGEX).groups;
+        if (magicMeterText && (magic !== maxMagic)) // If the dom-read fails, we just fall back to casting FTHOF whenever it's ready
+            return;
+
         const forceButton = document.getElementById('grimoireSpell1');
         if (forceButton && forceButton.classList.contains('ready'))
             forceButton.click();
