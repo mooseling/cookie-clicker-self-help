@@ -19,11 +19,16 @@ class AutoPlayer {
 
 
     run() {
-        if (this.#running)
+        this.#log('Run');
+
+        if (this.#running) {
+            this.#log('Already running. Returning.');
             return;
+        }
 
         this.#running = true;
 
+        this.#log('Starting loops. Fast loop will not log anything.');
         this.#fastLoop();
         this.#fiveSecondLoop();
         this.#fifteenMinuteLoop();
@@ -31,6 +36,8 @@ class AutoPlayer {
 
 
     stop() {
+        this.#log('Stop');
+
         this.#running = false;
         
         clearTimeout(this.#fastLoopTimeout);
@@ -40,8 +47,10 @@ class AutoPlayer {
 
 
     #fastLoop() {
-        if (!this.#running)
+        if (!this.#running) {
+            this.#log('Fastloop: AutoPlayer is not running. Returning.');
             return;
+        }
 
         if (this.autoClick)
             Game.ClickCookie();
@@ -51,8 +60,12 @@ class AutoPlayer {
 
 
     #fiveSecondLoop() {
-        if (!this.#running)
+        this.#log('5s Loop: Firing');
+
+        if (!this.#running) {
+            this.#log('5s Loop: AutoPlayer is not running. Returning.');
             return;
+        }
 
         if (this.autoPledge)
             this.#pledgeToTheElders(); // It's safe to call this often, it will check if it's needed
@@ -68,11 +81,17 @@ class AutoPlayer {
 
 
     #fifteenMinuteLoop() {
-        if (!this.#running)
-            return;
+        this.#log('15m Loop: Firing');
 
-        if (this.autoGarden)
+        if (!this.#running) {
+            this.#log('15m Loop: AutoPlayer is not running. Returning.')
+            return;
+        }
+
+        if (this.autoGarden) {
+            this.#log('15m Loop: Auto-garden is on, replanting bakers wheat');
             this.#replantGardenWithBakersWheat();
+        }
 
         this.#fifteenMinuteLoopTimeout = setTimeout(this.#fifteenMinuteLoop.bind(this), 900000);
     }
@@ -80,8 +99,10 @@ class AutoPlayer {
 
     #pledgeToTheElders() {
         const elderPledgeButton = document.querySelector('.upgrade[data-id="74"]');
-        if (elderPledgeButton && elderPledgeButton.classList.contains('enabled'))
+        if (elderPledgeButton && elderPledgeButton.classList.contains('enabled')) {
+            this.#log('Pledging to the elders!');
             elderPledgeButton.click();
+        }
     }
 
 
@@ -104,15 +125,19 @@ class AutoPlayer {
             return;
 
         const forceButton = document.getElementById('grimoireSpell1');
-        if (forceButton && forceButton.classList.contains('ready'))
+        if (forceButton && forceButton.classList.contains('ready')) {
+            this.#log('Full magic! Casting Force the Hand of Fate!');
             forceButton.click();
+        }
     }
 
 
     #stayInChristmas() {
         const christmasSwitch = document.querySelector('.upgrade[data-id="182"]');
-        if (christmasSwitch && christmasSwitch.classList.contains('enabled'))
+        if (christmasSwitch && christmasSwitch.classList.contains('enabled')) {
+            this.#log("Christmas is over! So sad. Let's do it again :)");
             christmasSwitch.click();
+        }
     }
 
 
@@ -131,6 +156,8 @@ class AutoPlayer {
         const gardenTileWrapper = document.getElementById('gardenPlot');
         const tiles = gardenTileWrapper.children;
 
+        this.#log('Found ' + tiles.length + ' garden tiles to fill');
+
         for (const tile of tiles)
             this.#plantPlant(plantId, tile);
     }
@@ -143,5 +170,13 @@ class AutoPlayer {
 
         plantButton.click();
         tile.click();
+    }
+
+
+    #log(message) {
+        const date = new Date();
+        const timeString = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+
+        console.log(timeString + ' - ' + message);
     }
 }
