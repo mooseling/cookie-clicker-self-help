@@ -5,10 +5,12 @@ class AutoPlayer {
     autoPledge = true;
     autoChristmas = true;
     autoForce = true;
+    autoGarden = true;
 
     #running;
     #fastLoopTimeout;
-    #slowLoopTimeout;
+    #fiveSecondLoopTimeout;
+    #fifteenMinuteLoopTimeout;
 
 
     constructor() {
@@ -23,7 +25,8 @@ class AutoPlayer {
         this.#running = true;
 
         this.#fastLoop();
-        this.#slowLoop();
+        this.#fiveSecondLoop();
+        this.#fifteenMinuteLoop();
     }
 
 
@@ -31,7 +34,8 @@ class AutoPlayer {
         this.#running = false;
         
         clearTimeout(this.#fastLoopTimeout);
-        clearTimeout(this.#slowLoopTimeout);
+        clearTimeout(this.#fiveSecondLoopTimeout);
+        clearTimeout(this.#fifteenMinuteLoopTimeout);
     }
 
 
@@ -46,7 +50,7 @@ class AutoPlayer {
     }
 
 
-    #slowLoop() {
+    #fiveSecondLoop() {
         if (!this.#running)
             return;
 
@@ -59,7 +63,18 @@ class AutoPlayer {
         if (this.autoChristmas)
             this.#stayInChristmas();
 
-        this.#slowLoopTimeout = setTimeout(this.#slowLoop.bind(this), 5000);
+        this.#fiveSecondLoopTimeout = setTimeout(this.#fiveSecondLoop.bind(this), 5000);
+    }
+
+
+    #fifteenMinuteLoop() {
+        if (!this.#running)
+            return;
+
+        if (this.autoGarden)
+            this.#replantGardenWithBakersWheat();
+
+        this.#fifteenMinuteLoopTimeout = setTimeout(this.#fifteenMinuteLoop.bind(this), 900000);
     }
 
 
@@ -98,5 +113,35 @@ class AutoPlayer {
         const christmasSwitch = document.querySelector('.upgrade[data-id="182"]');
         if (christmasSwitch && christmasSwitch.classList.contains('enabled'))
             christmasSwitch.click();
+    }
+
+
+    // There's an achievement for harvesting 1000 plants
+    // So we continuously harvest and refill the garden with the cheapest, fastest plant: baker's wheat
+    // The cost of this is actually kinda steep, but hopefully with golden cookies and auto-clicking, we cover it
+    // The timing is based on fertilizer, with average maturation 13 minutes. A fifteen minute loop should give us good harvests.
+    #replantGardenWithBakersWheat() {
+        const harvestAllButton = document.getElementById('gardenTool-1');
+        harvestAllButton.click();
+        this.#fillGarden('0');
+    }
+
+
+    #fillGarden(plantId) {
+        const gardenTileWrapper = document.getElementById('gardenPlot');
+        const tiles = gardenTileWrapper.children;
+
+        for (const tile of tiles)
+            this.#plantPlant(plantId, tile);
+    }
+
+
+    #plantPlant(plantId, tile) {
+        const plantButton = document.getElementById('gardenSeed-' + plantId);
+        if (!plantButton)
+            return;
+
+        plantButton.click();
+        tile.click();
     }
 }
