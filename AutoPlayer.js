@@ -65,7 +65,7 @@ class AutoPlayer {
 
     #pledgeToTheElders() {
         const elderPledgeButton = document.querySelector('.upgrade[data-id="74"]');
-        if (elderPledgeButton.classList.contains('enabled'))
+        if (elderPledgeButton && elderPledgeButton.classList.contains('enabled'))
             elderPledgeButton.click();
     }
 
@@ -87,7 +87,7 @@ class AutoPlayer {
 
     #stayInChristmas() {
         const christmasSwitch = document.querySelector('.upgrade[data-id="182"]');
-        if (christmasSwitch.classList.contains('enabled'))
+        if (christmasSwitch && christmasSwitch.classList.contains('enabled'))
             christmasSwitch.click();
     }
 }
