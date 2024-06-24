@@ -4,6 +4,7 @@ class AutoPlayer {
     autoClickShimmers = true;
     autoPledge = true;
     autoChristmas = true;
+    autoForce = true;
 
     #running;
     #fastLoopTimeout;
@@ -53,6 +54,8 @@ class AutoPlayer {
             this.#pledgeToTheElders(); // It's safe to call this often, it will check if it's needed
         if (this.autoClickShimmers)
             this.#clickShimmers();
+        if (this.autoForce)
+            this.#forceTheHandOfFate();
         if (this.autoChristmas)
             this.#stayInChristmas();
 
@@ -72,6 +75,13 @@ class AutoPlayer {
         const shimmers = document.getElementById('shimmers').children;
         for (const shimmer of shimmers)
             shimmer.click();
+    }
+
+
+    #forceTheHandOfFate() {
+        const forceButton = document.getElementById('grimoireSpell1');
+        if (forceButton)
+            forceButton.click();
     }
 
 
