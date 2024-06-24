@@ -5,7 +5,7 @@ class AutoPlayer {
     autoPledge = true;
     autoChristmas = true;
     autoForce = true;
-    autoGarden = true;
+    autoGarden = false; // Got the 1000-plant achievement. The next stage of auto-gardening will be more involved, if we get there.
 
     #running;
     #fastLoopTimeout;
