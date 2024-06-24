@@ -80,7 +80,7 @@ class AutoPlayer {
 
     #forceTheHandOfFate() {
         const forceButton = document.getElementById('grimoireSpell1');
-        if (forceButton)
+        if (forceButton && forceButton.classList.contains('ready'))
             forceButton.click();
     }
 
