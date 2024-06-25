@@ -30,7 +30,7 @@ class AutoPlayer {
 
         this.#running = true;
 
-        this.#log('Starting loops. Fast loop will not log anything.');
+        this.#log('Starting loops');
         this.#fastLoop();
         this.#fiveSecondLoop();
         this.#fifteenMinuteLoop();
@@ -64,8 +64,6 @@ class AutoPlayer {
 
 
     #fiveSecondLoop() {
-        this.#log('5s Loop: Firing');
-
         if (!this.#running) {
             this.#log('5s Loop: AutoPlayer is not running. Returning.');
             return;
@@ -97,13 +95,14 @@ class AutoPlayer {
             this.#replantGardenWithBakersWheat();
         }
 
+
+        this.#log('Cookies: ' + Game.cookies);
+
         this.#fifteenMinuteLoopTimeout = setTimeout(this.#fifteenMinuteLoop.bind(this), 900000);
     }
 
 
     #godzamokLoop() {
-        this.#log('Godzamok Loop: Firing');
-
         if (!this.#running) {
             this.#log('Godzamok Loop: AutoPlayer is not running. Returning.');
             return;
