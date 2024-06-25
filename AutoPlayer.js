@@ -7,6 +7,7 @@ class AutoPlayer {
     autoForce = true;
     autoGarden = false; // Got the 1000-plant achievement. The next stage of auto-gardening will be more involved, if we get there.
     autoGodzamok = true;
+    autoHarvestLumps = true;
 
     #running;
     #fastLoopTimeout;
@@ -77,6 +78,8 @@ class AutoPlayer {
             this.#forceTheHandOfFate();
         if (this.autoChristmas)
             this.#stayInChristmas();
+        if (this.autoHarvestLumps)
+            this.#harvestRipeLumps();
 
         this.#fiveSecondLoopTimeout = setTimeout(this.#fiveSecondLoop.bind(this), 5000);
     }
@@ -223,6 +226,16 @@ class AutoPlayer {
         document.getElementById('product2').click();      // 840...
         document.getElementById('product2').click();      // 850...
         document.getElementById('product2').click();      // 860!
+    }
+
+
+    // Sugar lump will ripen after ~20 hours, and then fall after another ~1 hour. We save that hour by clicking it when it's ripe.
+    #harvestRipeLumps() {
+        const lumpAge = Date.now() - Game.lumpT;
+        if (lumpAge >= Game.lumpRipeAge) {
+            this.#log('Sugar lump is ripe! Harvesting.');
+            document.getElementById('lumps')?.click();
+        }
     }
 
 
