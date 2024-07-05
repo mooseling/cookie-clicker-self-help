@@ -8,6 +8,7 @@ class AutoPlayer {
     autoGarden = false; // Got the 1000-plant achievement. The next stage of auto-gardening will be more involved, if we get there.
     autoGodzamok = true;
     autoHarvestLumps = true;
+    autoClickFortune = true;
 
     #running;
     #fastLoopTimeout;
@@ -80,6 +81,9 @@ class AutoPlayer {
             this.#stayInChristmas();
         if (this.autoHarvestLumps)
             this.#harvestRipeLumps();
+        if (this.autoClickFortune)
+            this.#clickFortune();
+
 
         this.#fiveSecondLoopTimeout = setTimeout(this.#fiveSecondLoop.bind(this), 5000);
     }
@@ -240,6 +244,17 @@ class AutoPlayer {
         if (lumpAge >= Game.lumpRipeAge) {
             this.#log('Sugar lump is ripe! Harvesting.');
             document.getElementById('lumps')?.click();
+        }
+    }
+
+
+    #clickFortune() {
+        const newsTicker = document.getElementById('commentsText1');
+        const fortunes = newsTicker.getElementsByClassName('fortune');
+
+        for (const fortune of fortunes) {
+            this.#log('Found a fortune!');
+            fortune.click();
         }
     }
 
