@@ -101,6 +101,10 @@ class AutoPlayer {
 
         this.#log('Cookies: ' + Game.cookies);
 
+        const grimoire = Game.Objects['Wizard tower'].minigame;
+        const magic = grimoire.magic;
+        this.#log('Magic: ' + magic);
+
         this.#fifteenMinuteLoopTimeout = setTimeout(this.#fifteenMinuteLoop.bind(this), 900000);
     }
 
@@ -145,16 +149,17 @@ class AutoPlayer {
     static #MAGIC_REGEX = /^(?<magic>\d+)\/(?<maxMagic>\d+).*$/;
 
     #forceTheHandOfFate() {
-        const magicMeterText = document.getElementById('grimoireBarText')?.innerText || '';
-        const {magic, maxMagic} = magicMeterText.match(AutoPlayer.#MAGIC_REGEX).groups;
-        if (magicMeterText && (magic !== maxMagic)) // If the dom-read fails, we just fall back to casting FTHOF whenever it's ready
+        // We actually no longer use the dom here, because the magic meter does not update reliably
+        // Cookie Clicker has its ways of minimising unnecessary work, including updating the GUI when idle
+        const grimoire = Game.Objects['Wizard tower'].minigame;
+        const magic = grimoire.magic;
+        const maxMagic = grimoire.magicM;
+        if (magic !== maxMagic)
             return;
 
-        const forceButton = document.getElementById('grimoireSpell1');
-        if (forceButton && forceButton.classList.contains('ready')) {
-            this.#log('Full magic! Casting Force the Hand of Fate!');
-            forceButton.click();
-        }
+        this.#log('Full magic! Casting Force the Hand of Fate!');
+        const fthof = grimoire.spells['hand of fate'];
+        grimoire.castSpell(fthof);
     }
 
 
