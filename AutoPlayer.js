@@ -2,7 +2,7 @@ class AutoPlayer {
 
     autoClick = true;
     autoClickShimmers = true;
-    autoPledge = true;
+    autoPledge = false; // This should never have been a feature. Pledging cost multiplies by 8 each time!
     autoChristmas = true;
     autoForce = true;
     autoGarden = false; // Got the 1000-plant achievement. The next stage of auto-gardening will be more involved, if we get there.
