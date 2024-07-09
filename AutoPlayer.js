@@ -9,6 +9,7 @@ class AutoPlayer {
     autoGodzamok = true;
     autoHarvestLumps = true;
     autoClickFortune = true;
+    autoWrinkle = true;
 
     #running;
     #fastLoopTimeout;
@@ -81,8 +82,8 @@ class AutoPlayer {
             this.#stayInChristmas();
         if (this.autoHarvestLumps)
             this.#harvestRipeLumps();
-        if (this.autoClickFortune)
-            this.#clickFortune();
+        if (this.autoWrinkle)
+            this.#MaintainWrinklerPopulation();
 
 
         this.#fiveSecondLoopTimeout = setTimeout(this.#fiveSecondLoop.bind(this), 5000);
@@ -255,6 +256,17 @@ class AutoPlayer {
         for (const fortune of fortunes) {
             this.#log('Found a fortune!');
             fortune.click();
+        }
+    }
+
+
+    // Popping wrinklers can help unlock eggs and halloween cookies
+    // Wrinkler count doesn't affect their spawn rate, so we aim to maintain a high wrinkler count and maximise pops
+    #MaintainWrinklerPopulation() {
+        const activeWrinklers = Game.wrinklers.filter(wrinkler => wrinkler.phase === 2);
+        if (activeWrinklers.length === 12) {
+            this.#log("12 Wrinklers! Popping 1.")
+            Game.PopRandomWrinkler();
         }
     }
 
