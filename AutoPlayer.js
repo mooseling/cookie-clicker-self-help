@@ -149,10 +149,6 @@ class AutoPlayer {
     }
 
 
-    // Magic Meter will read something like "51/121 (+0.03/s)" or "121/121"
-    // It fills faster the fuller it is, so we want to wait until we're at max magic to cast anything
-    static #MAGIC_REGEX = /^(?<magic>\d+)\/(?<maxMagic>\d+).*$/;
-
     #forceTheHandOfFate() {
         // We actually no longer use the dom here, because the magic meter does not update reliably
         // Cookie Clicker has its ways of minimising unnecessary work, including updating the GUI when idle
