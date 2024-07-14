@@ -13,7 +13,7 @@ class AutoPlayer {
 
     #running;
     #fastLoopTimeout;
-    #fiveSecondLoopTimeout;
+    #oftenLoopTimeout;
     #fifteenMinuteLoopTimeout;
     #godzamokLoopTimeout;
 
@@ -41,7 +41,7 @@ class AutoPlayer {
 
         this.#log('Starting loops');
         this.#fastLoop();
-        this.#fiveSecondLoop();
+        this.#oftenLoop();
         this.#fifteenMinuteLoop();
         this.#godzamokLoop();
     }
@@ -53,7 +53,7 @@ class AutoPlayer {
         this.#running = false;
 
         clearTimeout(this.#fastLoopTimeout);
-        clearTimeout(this.#fiveSecondLoopTimeout);
+        clearTimeout(this.#oftenLoopTimeout);
         clearTimeout(this.#fifteenMinuteLoopTimeout);
         clearTimeout(this.#godzamokLoopTimeout);
     }
@@ -72,9 +72,9 @@ class AutoPlayer {
     }
 
 
-    #fiveSecondLoop() {
+    #oftenLoop() {
         if (!this.#running) {
-            this.#log('5s Loop: AutoPlayer is not running. Returning.');
+            this.#log('Often Loop: AutoPlayer is not running. Returning.');
             return;
         }
 
@@ -91,7 +91,7 @@ class AutoPlayer {
         if (this.autoEndGame)
             this.#endGameLoop()
 
-        this.#fiveSecondLoopTimeout = setTimeout(this.#fiveSecondLoop.bind(this), 5000);
+        this.#oftenLoopTimeout = setTimeout(this.#oftenLoop.bind(this), 3500); // 3.5 seconds for better comboing, and cookie storms
     }
 
 
