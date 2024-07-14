@@ -293,9 +293,14 @@ class AutoPlayer {
             dragonflight: false
         }
 
+        // It's important we use grimoire.getFailChance(). On-screen cookies and Diminished Ineptitude affect it.
+        const grimoire = Game.Objects['Wizard tower'].minigame;
+        const forceFate = grimoire.spells['hand of fate'];
+        const failChance = grimoire.getFailChance(forceFate);
+
 		this.#math.seedrandom(Game.seed + '/' + spells);
 		const roll = this.#math.random()
-		if (roll < (1 - 0.15 * ($scope.on_screen_cookies + 1))) {
+		if (roll < (1 - failChance)) { // If spell succeeds...
 			/* Random is called a few times in setting up the golden cookie */
 			if (chime==1 && $scope.ascensionMode!=1) this.#math.random();
 			if (season=='valentines' || season=='easter')
