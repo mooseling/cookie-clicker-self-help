@@ -275,21 +275,21 @@ class AutoPlayer {
             this.#log("Golden combo is happening!");
 
             const forceCost = this.#grimoire.getSpellCost(this.#forceTheHandOfFate);
-            const gamblersCost = this.#grimoire.getSpellCost(this.#gamblersFeverDream);
+            const hagglersCost = this.#grimoire.getSpellCost(this.#hagglersCharm);
 
             let numSpellsRequired;
 
             // If we have enough magic to potentially reach Force, we start going for it
-            // But each time we cast Gambler's we have to recheck magic
+            // But each time we cast Haggler's we have to recheck magic
             while (
                 numSpellsRequired = this.#numSpellsBeforeClickFrenzy(),
-                this.#grimoire.magic >= forceCost + numSpellsRequired * gamblersCost) {
-
+                this.#grimoire.magic >= forceCost + numSpellsRequired * hagglersCost
+            ) {
                 this.#log("Click Frenzy is within reach! Magic: " + this.#grimoire.magic);
 
                 if (numSpellsRequired > 0) {
-                    this.#log("Casting Gambler's Fever Dream. Spells needed: " + numSpellsRequired);
-                    this.#grimoire.castSpell(this.#gamblersFeverDream);
+                    this.#log("Casting Haggler's Charm. Spells needed: " + numSpellsRequired);
+                    this.#grimoire.castSpell(this.#hagglersCharm);
                 } else {
                     this.#log("Click Frenzy is next! Casting Force!");
                     this.#grimoire.castSpell(this.#forceTheHandOfFate);
@@ -297,12 +297,14 @@ class AutoPlayer {
             }
         }
 
-      // If Force is not queued up, we cast Gambler's Fever Dream to bring it closer
-      // But only at max magic because then magic refills faster
-      if (this.#scryFate() !== 'Click Frenzy' && this.#magicIsFull()) {
-        this.#log("Magic is full and Click Frenzy is not next, casting Gambler's Fever Dream");
-        this.#grimoire.castSpell(this.#gamblersFeverDream);
-      }
+        // If Force is not queued up, we cast Haggler's Charm to bring it closer
+        // But only at max magic because then magic refills faster
+        // We used to cast Gambler's Fever Dream, but that often works out poorly or costs more magic
+        // The ideal version would predict the outcome of GFD and then decide which spell to cast
+        if (this.#scryFate() !== 'Click Frenzy' && this.#magicIsFull()) {
+            this.#log("Magic is full and Click Frenzy is not next, casting Haggler's Charm");
+            this.#grimoire.castSpell(this.#hagglersCharm);
+        }
     }
 
 
@@ -384,6 +386,7 @@ class AutoPlayer {
     		}
   	}
 
+
   	get #grimoire() {
         return Game.Objects['Wizard tower'].minigame;
     }
@@ -392,8 +395,8 @@ class AutoPlayer {
       return this.#grimoire.spells['hand of fate'];
     }
 
-    get #gamblersFeverDream() {
-      return this.#grimoire.spells['gambler\'s fever dream'];
+    get #hagglersCharm() {
+      return this.#grimoire.spells['haggler\'s charm'];
     }
 
     #BUILDING_BUFF_NAMES = ["High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up", "Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms", "Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles", "Solar flare", "Winning streak", "Macrocosm", "Refactoring", "Cosmic nursery", "Brainstorm", "Deduplication"];
