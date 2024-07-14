@@ -203,31 +203,31 @@ class AutoPlayer {
     // We will continually re-trigger it, so we get the boost with and without golden cookies
     #triggerGodzamok(targetFarmCount = null) {
 
-      // First decide how many farms to sell. We go higher during end game combos.
-      // But also, for debugging, this parameter can be set by the caller
-      if (targetFarmCount === null) {
-        if (this.#goldenComboIsHappening() && Game.buffs['Click frenzy'])
-          targetFarmCount = this.godzamokFarmCountEndGame;
-        else
-          targetFarmCount = this.godzamokFarmCountNormal;
-      }
+        // First decide how many farms to sell. We go higher during end game combos.
+        // But also, for debugging, this parameter can be set by the caller
+        if (targetFarmCount === null) {
+            if (this.#goldenComboIsHappening() && Game.buffs['Click frenzy'])
+                targetFarmCount = this.godzamokFarmCountEndGame;
+            else
+                targetFarmCount = this.godzamokFarmCountNormal;
+        }
 
-      const farm = Game.Objects.Farm;
+        const farm = Game.Objects.Farm;
 
-      // If the game is in sell-mode, it won't buy things. So we'll just switch it over briefly...
-      let inSellMode = Game.buyMode === -1;
-      if (inSellMode)
-        Game.buyMode === 1;
+        // If the game is in sell-mode, it won't buy things. So we'll just switch it over briefly...
+        let inSellMode = Game.buyMode === -1;
+        if (inSellMode)
+            Game.buyMode === 1;
 
-      if (farm.amount < targetFarmCount)
-        farm.buy(targetFarmCount - farm.amount);
+        if (farm.amount < targetFarmCount)
+            farm.buy(targetFarmCount - farm.amount);
 
-      farm.sell(-1); // -1 means all
+        farm.sell(-1); // -1 means all
 
-      farm.buy(targetFarmCount);
+        farm.buy(targetFarmCount);
 
-      if (inSellMode)
-        Game.buyMode = -1; // ...and reset it afterwards
+        if (inSellMode)
+            Game.buyMode = -1; // ...and reset it afterwards
     }
 
 
@@ -271,31 +271,31 @@ class AutoPlayer {
 
 
     #endGameLoop() {
-      if (this.#goldenComboIsHappening() && !this.#clickFrenzyIsHappening()) {
-        this.#log("Golden combo is happening!");
+        if (this.#goldenComboIsHappening() && !this.#clickFrenzyIsHappening()) {
+            this.#log("Golden combo is happening!");
 
-        const forceCost = this.#grimoire.getSpellCost(this.#forceTheHandOfFate);
-        const gamblersCost = this.#grimoire.getSpellCost(this.#gamblersFeverDream);
+            const forceCost = this.#grimoire.getSpellCost(this.#forceTheHandOfFate);
+            const gamblersCost = this.#grimoire.getSpellCost(this.#gamblersFeverDream);
 
-        let numSpellsRequired;
+            let numSpellsRequired;
 
-        // If we have enough magic to potentially reach Force, we start going for it
-        // But each time we cast Gambler's we have to recheck magic
-        while (
-            numSpellsRequired = this.#numSpellsBeforeClickFrenzy(),
-            this.#grimoire.magic >= forceCost + numSpellsRequired * gamblersCost) {
+            // If we have enough magic to potentially reach Force, we start going for it
+            // But each time we cast Gambler's we have to recheck magic
+            while (
+                numSpellsRequired = this.#numSpellsBeforeClickFrenzy(),
+                this.#grimoire.magic >= forceCost + numSpellsRequired * gamblersCost) {
 
-          this.#log("Click Frenzy is within reach! Magic: " + this.#grimoire.magic);
+                this.#log("Click Frenzy is within reach! Magic: " + this.#grimoire.magic);
 
-          if (numSpellsRequired > 0) {
-            this.#log("Casting Gambler's Fever Dream. Spells needed: " + numSpellsRequired);
-            this.#grimoire.castSpell(this.#gamblersFeverDream);
-          } else {
-            this.#log("Click Frenzy is next! Casting Force!");
-            this.#grimoire.castSpell(this.#forceTheHandOfFate);
-          }
+                if (numSpellsRequired > 0) {
+                    this.#log("Casting Gambler's Fever Dream. Spells needed: " + numSpellsRequired);
+                    this.#grimoire.castSpell(this.#gamblersFeverDream);
+                } else {
+                    this.#log("Click Frenzy is next! Casting Force!");
+                    this.#grimoire.castSpell(this.#forceTheHandOfFate);
+                }
+            }
         }
-      }
 
       // If Force is not queued up, we cast Gambler's Fever Dream to bring it closer
       // But only at max magic because then magic refills faster
@@ -307,32 +307,32 @@ class AutoPlayer {
 
 
     #goldenComboIsHappening() {
-      if (!Game.buffs.Frenzy)
-        return false;
-      return this.#BUILDING_BUFF_NAMES.some(name => Game.buffs[name]);
+        if (!Game.buffs.Frenzy)
+            return false;
+        return this.#BUILDING_BUFF_NAMES.some(name => Game.buffs[name]);
     }
 
 
     #clickFrenzyIsHappening() {
-      return Game.buffs['Click frenzy'] !== undefined;
+        return Game.buffs['Click frenzy'] !== undefined;
     }
 
 
     #numSpellsBeforeClickFrenzy() {
-      for (let spellsToCast = 0; spellsToCast < 20; spellsToCast++) {
-        if (this.#scryFate(spellsToCast) === 'Click Frenzy')
-          return spellsToCast;
-      }
-      return 200; // Not true, but fine for our purposes. We won't go for a combo in this case.
+        for (let spellsToCast = 0; spellsToCast < 20; spellsToCast++) {
+            if (this.#scryFate(spellsToCast) === 'Click Frenzy')
+                return spellsToCast;
+        }
+        return 200; // Not true, but fine for our purposes. We won't go for a combo in this case.
     }
 
 
     // We used to read the dom to work out magic, but it wasn't reliable. CC optimises GUI updates.
     #magicIsFull() {
-      const magic = this.#grimoire.magic;
-      const maxMagic = this.#grimoire.magicM;
+        const magic = this.#grimoire.magic;
+        const maxMagic = this.#grimoire.magicM;
 
-      return magic === maxMagic;
+        return magic === maxMagic;
     }
 
 
@@ -358,45 +358,45 @@ class AutoPlayer {
         const forceFate = grimoire.spells['hand of fate'];
         const failChance = grimoire.getFailChance(forceFate);
 
-		this.#math.seedrandom(Game.seed + '/' + spells);
-		const roll = this.#math.random()
-		if (roll < (1 - failChance)) { // If spell succeeds...
-			/* Random is called a few times in setting up the golden cookie */
-			if (chime==1 && $scope.ascensionMode!=1) this.#math.random();
-			if (season=='valentines' || season=='easter')
-			{
-				this.#math.random();
-			}
-			this.#math.random();
-			this.#math.random();
-			/**/
+        this.#math.seedrandom(Game.seed + '/' + spells);
+        const roll = this.#math.random()
+        if (roll < (1 - failChance)) { // If spell succeeds...
+       			/* Random is called a few times in setting up the golden cookie */
+       			if (chime==1 && $scope.ascensionMode!=1) this.#math.random();
+       			if (season=='valentines' || season=='easter')
+       			{
+        				this.#math.random();
+       			}
+       			this.#math.random();
+       			this.#math.random();
+       			/**/
 
-			var choices=[];
-			choices.push('Frenzy','Lucky');
-			if (!$scope.dragonflight) choices.push('Click Frenzy');
-			if (this.#math.random()<0.1) choices.push('Cookie Storm','Cookie Storm','Blab');
-			if (this.#math.random()<0.25) choices.push('Building Special');
-			if (this.#math.random()<0.15) choices=['Cookie Storm Drop'];
-			if (this.#math.random()<0.0001) choices.push('Free Sugar Lump');
-			return this.#choose(choices);
-		} else {
-			return 'wrath';
-		}
-	}
+       			var choices=[];
+       			choices.push('Frenzy','Lucky');
+       			if (!$scope.dragonflight) choices.push('Click Frenzy');
+       			if (this.#math.random()<0.1) choices.push('Cookie Storm','Cookie Storm','Blab');
+       			if (this.#math.random()<0.25) choices.push('Building Special');
+       			if (this.#math.random()<0.15) choices=['Cookie Storm Drop'];
+       			if (this.#math.random()<0.0001) choices.push('Free Sugar Lump');
+       			return this.#choose(choices);
+    		} else {
+     			  return 'wrath';
+    		}
+  	}
 
-	get #grimoire() {
-      return Game.Objects['Wizard tower'].minigame;
-  }
+  	get #grimoire() {
+        return Game.Objects['Wizard tower'].minigame;
+    }
 
-  get #forceTheHandOfFate() {
-    return this.#grimoire.spells['hand of fate'];
-  }
+    get #forceTheHandOfFate() {
+      return this.#grimoire.spells['hand of fate'];
+    }
 
-  get #gamblersFeverDream() {
-    return this.#grimoire.spells['gambler\'s fever dream'];
-  }
+    get #gamblersFeverDream() {
+      return this.#grimoire.spells['gambler\'s fever dream'];
+    }
 
-  #BUILDING_BUFF_NAMES = ["High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up", "Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms", "Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles", "Solar flare", "Winning streak", "Macrocosm", "Refactoring", "Cosmic nursery", "Brainstorm", "Deduplication"];
+    #BUILDING_BUFF_NAMES = ["High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up", "Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms", "Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles", "Solar flare", "Winning streak", "Macrocosm", "Refactoring", "Cosmic nursery", "Brainstorm", "Deduplication"];
 
 
     // From CC, used in the fate-prediction code
