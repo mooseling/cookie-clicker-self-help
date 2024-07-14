@@ -11,6 +11,9 @@ class AutoPlayer {
     autoWrinkle = true;
     autoEndGame = true;
 
+    godzamokFarmCountNormal = 890;
+    godzamokFarmCountEndGame = 970;
+
     #running;
     #fastLoopTimeout;
     #oftenLoopTimeout;
@@ -198,20 +201,33 @@ class AutoPlayer {
     // Godzamok gives a big click-boost for selling lots of buildings in one go
     // It's massively profitable, and combined with click-frenzies it actually solves the game
     // We will continually re-trigger it, so we get the boost with and without golden cookies
-    #triggerGodzamok(farmCount = 890) {
+    #triggerGodzamok(targetFarmCount = null) {
+
+      // First decide how many farms to sell. We go higher during end game combos.
+      // But also, for debugging, this parameter can be set by the caller
+      if (targetFarmCount === null) {
+        if (this.#goldenComboIsHappening() && Game.buffs['Click frenzy'])
+          targetFarmCount = this.godzamokFarmCountEndGame;
+        else
+          targetFarmCount = this.godzamokFarmCountNormal;
+      }
+
       const farm = Game.Objects.Farm;
 
+      // If the game is in sell-mode, it won't buy things. So we'll just switch it over briefly...
+      let inSellMode = Game.buyMode === -1;
+      if (inSellMode)
+        Game.buyMode === 1;
+
+      if (farm.amount < targetFarmCount)
+        farm.buy(targetFarmCount - farm.amount);
 
       farm.sell(-1); // -1 means all
 
-      let inSellMode = Game.buyMode === -1;
-      if (inSellMode)
-        Game.buyMode === 1; // If the game is in sell-mode, it won't buy things
-
-      farm.buy(farmCount);
+      farm.buy(targetFarmCount);
 
       if (inSellMode)
-        Game.buyMode = -1; // Just reset this afterwards
+        Game.buyMode = -1; // ...and reset it afterwards
     }
 
 
