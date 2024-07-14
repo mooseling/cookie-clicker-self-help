@@ -4,12 +4,12 @@ class AutoPlayer {
     autoClickShimmers = true;
     autoPledge = false; // This should never have been a feature. Pledging cost multiplies by 8 each time!
     autoChristmas = true;
-    autoForce = true;
     autoGarden = false; // Got the 1000-plant achievement. The next stage of auto-gardening will be more involved, if we get there.
     autoGodzamok = true;
     autoHarvestLumps = true;
     autoClickFortune = true;
     autoWrinkle = true;
+    autoEndGame = true;
 
     #running;
     #fastLoopTimeout;
@@ -82,15 +82,14 @@ class AutoPlayer {
             this.#pledgeToTheElders(); // It's safe to call this often, it will check if it's needed
         if (this.autoClickShimmers)
             this.#clickShimmers();
-        if (this.autoForce)
-            this.#forceTheHandOfFate();
         if (this.autoChristmas)
             this.#stayInChristmas();
         if (this.autoHarvestLumps)
             this.#harvestRipeLumps();
         if (this.autoWrinkle)
             this.#MaintainWrinklerPopulation();
-
+        if (this.autoEndGame)
+            this.#endGameLoop()
 
         this.#fiveSecondLoopTimeout = setTimeout(this.#fiveSecondLoop.bind(this), 5000);
     }
@@ -152,21 +151,6 @@ class AutoPlayer {
             shimmers.item(0)?.click();
             shimmers = document.getElementById('shimmers').children;
         }
-    }
-
-
-    #forceTheHandOfFate() {
-        // We actually no longer use the dom here, because the magic meter does not update reliably
-        // Cookie Clicker has its ways of minimising unnecessary work, including updating the GUI when idle
-        const grimoire = Game.Objects['Wizard tower'].minigame;
-        const magic = grimoire.magic;
-        const maxMagic = grimoire.magicM;
-        if (magic !== maxMagic)
-            return;
-
-        this.#log('Full magic! Casting Force the Hand of Fate!');
-        const fthof = grimoire.spells['hand of fate'];
-        grimoire.castSpell(fthof);
     }
 
 
@@ -275,10 +259,83 @@ class AutoPlayer {
         }
     }
 
+    // ================================= End Game =================================
+    // At this point, auto-clicking and continously casting Force the Hand of Fate is not making any progress
+    // We need to get strategic:
+    // 1. Predict the next outcome of Force, and queue up a Click Frenzy by casting other spells
+    // 2. Wait for a natural golden cookie combo of Frenzy + Building Special, then cast Force
+    // Since we're already auto-clicking and auto-Godzamoking, this should be enough to automate the end game
 
-    scryFate(extraSpellsCast = 0) {
-        const spellsCastTotal = Game.Objects['Wizard tower'].minigame.spellsCastTotal;
-        const chimeIsOn = false; // Chime is on, but this only calls random() in Firefox becuase of pitchSupport
+
+    #endGameLoop() {
+      if (this.#goldenComboIsHappening() && !this.#clickFrenzyIsHappening()) {
+        this.#log("Golden combo is happening!");
+
+        const forceCost = this.#grimoire.getSpellCost(this.#forceTheHandOfFate);
+        const gamblersCost = this.#grimoire.getSpellCost(this.#gamblersFeverDream);
+
+        let numSpellsRequired;
+
+        // If we have enough magic to potentially reach Force, we start going for it
+        // But each time we cast Gambler's we have to recheck magic
+        while (
+            numSpellsRequired = this.#numSpellsBeforeClickFrenzy(),
+            this.#grimoire.magic >= forceCost + numSpellsRequired * gamblersCost) {
+
+          this.#log("Click Frenzy is within reach! Magic: " + this.#grimoire.magic);
+
+          if (numSpellsRequired > 0) {
+            this.#log("Casting Gambler's Fever Dream. Spells needed: " + numSpellsRequired);
+            this.#grimoire.castSpell(this.#gamblersFeverDream);
+          } else {
+            this.#log("Click Frenzy is next! Casting Force!");
+            this.#grimoire.castSpell(this.#forceTheHandOfFate);
+          }
+        }
+      }
+
+      // If Force is not queued up, we cast Gambler's Fever Dream to bring it closer
+      // But only at max magic because then magic refills faster
+      if (this.#scryFate() !== 'Click Frenzy' && this.#magicIsFull()) {
+        this.#log("Magic is full and Click Frenzy is not next, casting Gambler's Fever Dream");
+        this.#grimoire.castSpell(this.#gamblersFeverDream);
+      }
+    }
+
+
+    #goldenComboIsHappening() {
+      if (!Game.buffs.Frenzy)
+        return false;
+      return this.#BUILDING_BUFF_NAMES.some(name => Game.buffs[name]);
+    }
+
+
+    #clickFrenzyIsHappening() {
+      return Game.buffs['Click frenzy'] !== undefined;
+    }
+
+
+    #numSpellsBeforeClickFrenzy() {
+      for (let spellsToCast = 0; spellsToCast < 20; spellsToCast++) {
+        if (this.#scryFate(spellsToCast) === 'Click Frenzy')
+          return spellsToCast;
+      }
+      return 200; // Not true, but fine for our purposes. We won't go for a combo in this case.
+    }
+
+
+    // We used to read the dom to work out magic, but it wasn't reliable. CC optimises GUI updates.
+    #magicIsFull() {
+      const magic = this.#grimoire.magic;
+      const maxMagic = this.#grimoire.magicM;
+
+      return magic === maxMagic;
+    }
+
+
+    #scryFate(extraSpellsCast = 0) {
+        const spellsCastTotal = this.#grimoire.spellsCastTotal;
+        const chimeIsOn = false; // Chime is on, but Orteil seems to have changed this behaviour
         const nextFate = this.#check_cookies(spellsCastTotal + extraSpellsCast, Game.season, chimeIsOn);
         return nextFate;
     }
@@ -323,6 +380,20 @@ class AutoPlayer {
 			return 'wrath';
 		}
 	}
+
+	get #grimoire() {
+      return Game.Objects['Wizard tower'].minigame;
+  }
+
+  get #forceTheHandOfFate() {
+    return this.#grimoire.spells['hand of fate'];
+  }
+
+  get #gamblersFeverDream() {
+    return this.#grimoire.spells['gambler\'s fever dream'];
+  }
+
+  #BUILDING_BUFF_NAMES = ["High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up", "Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms", "Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles", "Solar flare", "Winning streak", "Macrocosm", "Refactoring", "Cosmic nursery", "Brainstorm", "Deduplication"];
 
 
     // From CC, used in the fate-prediction code
