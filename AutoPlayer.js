@@ -51,7 +51,7 @@ class AutoPlayer {
         this.#log('Stop');
 
         this.#running = false;
-        
+
         clearTimeout(this.#fastLoopTimeout);
         clearTimeout(this.#fiveSecondLoopTimeout);
         clearTimeout(this.#fifteenMinuteLoopTimeout);
@@ -278,7 +278,8 @@ class AutoPlayer {
 
     scryFate(extraSpellsCast = 0) {
         const spellsCastTotal = Game.Objects['Wizard tower'].minigame.spellsCastTotal;
-        const nextFate = this.#check_cookies(spellsCastTotal + extraSpellsCast, Game.season, Game.chimeType);
+        const chimeIsOn = false; // Chime is on, but this only calls random() in Firefox becuase of pitchSupport
+        const nextFate = this.#check_cookies(spellsCastTotal + extraSpellsCast, Game.season, chimeIsOn);
         return nextFate;
     }
 
@@ -304,7 +305,7 @@ class AutoPlayer {
 			this.#math.random();
 			this.#math.random();
 			/**/
-			
+
 			var choices=[];
 			choices.push('Frenzy','Lucky');
 			if (!$scope.dragonflight) choices.push('Click Frenzy');
