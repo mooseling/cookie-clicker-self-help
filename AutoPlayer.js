@@ -17,9 +17,13 @@ class AutoPlayer {
     #fifteenMinuteLoopTimeout;
     #godzamokLoopTimeout;
 
+    #math = {};
+
 
     constructor() {
         this.#running = false;
+
+        (function(a,b,_Math,d,e,f){function k(a){var b,c=a.length,e=this,f=0,g=e.i=e.j=0,h=e.S=[];for(c||(a=[c++]);d>f;)h[f]=f++;for(f=0;d>f;f++)h[f]=h[g=j&g+a[f%c]+(b=h[f])],h[g]=b;(e.g=function(a){for(var b,c=0,f=e.i,g=e.j,h=e.S;a--;)b=h[f=j&f+1],c=c*d+h[j&(h[f]=h[g=j&g+b])+(h[g]=b)];return e.i=f,e.j=g,c})(d)}function l(a,b){var e,c=[],d=(typeof a)[0];if(b&&"o"==d)for(e in a)try{c.push(l(a[e],b-1))}catch(f){}return c.length?c:"s"==d?a:a+"\0"}function m(a,b){for(var d,c=a+"",e=0;c.length>e;)b[j&e]=j&(d^=19*b[j&e])+c.charCodeAt(e++);return o(b)}function n(c){try{return a.crypto.getRandomValues(c=new Uint8Array(d)),o(c)}catch(e){return[+new Date,a,a.navigator.plugins,a.screen,o(b)]}}function o(a){return String.fromCharCode.apply(0,a)}var g=Math.pow(d,e),h=Math.pow(2,f),i=2*h,j=d-1;_Math.seedrandom=function(a,f){var j=[],p=m(l(f?[a,o(b)]:0 in arguments?a:n(),3),j),q=new k(j);return m(o(q.S),b),_Math.random=function(){for(var a=q.g(e),b=g,c=0;h>a;)a=(a+c)*d,b*=d,c=q.g(1);for(;a>=i;)a/=2,b/=2,c>>>=1;return(a+c)/b},p},m(Math.random(),b)})(window,[],this.#math,256,6,52);
     }
 
 
@@ -268,6 +272,53 @@ class AutoPlayer {
             Game.PopRandomWrinkler();
         }
     }
+
+
+    scryFate(extraSpellsCast = 0) {
+        const spellsCastTotal = Game.Objects['Wizard tower'].minigame.spellsCastTotal;
+        const nextFate = this.#check_cookies(spellsCastTotal + extraSpellsCast, Game.season, Game.chimeType);
+        return nextFate;
+    }
+
+
+    // Stolen from http://fthof-planner.s3-website.us-east-2.amazonaws.com/
+    // The original returns a cookie object with various properties. We don't use most of this, so I've simplified the return
+    #check_cookies(spells, season, chime) {
+        const $scope = {
+            on_screen_cookies: 0, // On fthof-planner, this can be changed via GUI
+            ascensionMode: 0,     // I used a breakpoint to get this. Perhaps 1 would mean challenge mode?
+            dragonflight: false
+        }
+
+		this.#math.seedrandom(Game.seed + '/' + spells);
+		const roll = this.#math.random()
+		if (roll < (1 - 0.15 * ($scope.on_screen_cookies + 1))) {
+			/* Random is called a few times in setting up the golden cookie */
+			if (chime==1 && $scope.ascensionMode!=1) this.#math.random();
+			if (season=='valentines' || season=='easter')
+			{
+				this.#math.random();
+			}
+			this.#math.random();
+			this.#math.random();
+			/**/
+			
+			var choices=[];
+			choices.push('Frenzy','Lucky');
+			if (!$scope.dragonflight) choices.push('Click Frenzy');
+			if (this.#math.random()<0.1) choices.push('Cookie Storm','Cookie Storm','Blab');
+			if (this.#math.random()<0.25) choices.push('Building Special');
+			if (this.#math.random()<0.15) choices=['Cookie Storm Drop'];
+			if (this.#math.random()<0.0001) choices.push('Free Sugar Lump');
+			return this.#choose(choices);
+		} else {
+			return 'wrath';
+		}
+	}
+
+
+    // From CC, used in the fate-prediction code
+    #choose(arr) {return arr[Math.floor(this.#math.random()*arr.length)];}
 
 
     #log(message) {
