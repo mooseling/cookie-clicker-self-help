@@ -275,21 +275,26 @@ class AutoPlayer {
             this.#log("Golden combo is happening!");
 
             const forceCost = this.#grimoire.getSpellCost(this.#forceTheHandOfFate);
-            const hagglersCost = this.#grimoire.getSpellCost(this.#hagglersCharm);
 
-            let numSpellsRequired;
+            let numSpellsRequired = this.#numSpellsBeforeClickFrenzy()
+            let burnCost = 0;
 
-            // If we have enough magic to potentially reach Force, we start going for it
-            // But each time we cast Haggler's we have to recheck magic
+            for (let spellBurnCount = 0; spellBurnCount < numSpellsRequired; spellBurnCount++)
+                burnCost += this.#grimoire.getSpellCost(this.#getNextBurnSpell(spellBurnCount));
+
+            this.#log(`We have to burn ${numSpellsRequired} spells to reach Click Frenzy, costing ${burnCost}/${this.#grimoire.magic} magic`);
+
+            let nextBurnSpell;
             while (
-                numSpellsRequired = this.#numSpellsBeforeClickFrenzy(),
-                this.#grimoire.magic >= forceCost + numSpellsRequired * hagglersCost
+                (this.#scryFate() === 'Click Frenzy' && this.#grimoire.magic >= forceCost)
+                || (
+                    nextBurnSpell = this.#getNextBurnSpell(),
+                    this.#grimoire.magic >= forceCost + this.#grimoire.getSpellCost(nextBurnSpell)
+                )
             ) {
-                this.#log("Click Frenzy is within reach! Magic: " + this.#grimoire.magic);
-
-                if (numSpellsRequired > 0) {
-                    this.#log("Casting Haggler's Charm. Spells needed: " + numSpellsRequired);
-                    this.#grimoire.castSpell(this.#hagglersCharm);
+                if (this.#scryFate() !== 'Click Frenzy') {
+                    this.#log(`Casting ${nextBurnSpell.name}...`);
+                    this.#grimoire.castSpell(nextBurnSpell);
                 } else {
                     this.#log("Click Frenzy is next! Casting Force!");
                     this.#grimoire.castSpell(this.#forceTheHandOfFate);
@@ -302,8 +307,8 @@ class AutoPlayer {
         // We used to cast Gambler's Fever Dream, but that often works out poorly or costs more magic
         // The ideal version would predict the outcome of GFD and then decide which spell to cast
         if (this.#scryFate() !== 'Click Frenzy' && this.#magicIsFull()) {
-            this.#log("Magic is full and Click Frenzy is not next, casting Haggler's Charm");
-            this.#grimoire.castSpell(this.#hagglersCharm);
+            this.#log("Magic is full and Click Frenzy is not next, casting a burn spell");
+            this.#grimoire.castSpell(this.#getNextBurnSpell());
         }
     }
 
@@ -387,6 +392,56 @@ class AutoPlayer {
   	}
 
 
+    #getNextBurnSpell(lookAhead = 0) {
+      const spellsCast = this.#grimoire.spellsCastTotal
+
+      if (this.#safeToCastGamblers(spellsCast + lookAhead))
+        return this.#gamblersFeverDream;
+
+      return this.#hagglersCharm;
+    }
+
+
+    // We often cast a spell just to increase the spell count. Gambler's Fever Dream is very cheap.
+    // However, it usually casts another spell, and the total cost will be more than casting Haggler's Charm
+    // Unless we hit a spell that currently does nothing, which will be free!
+    #safeToCastGamblers(spellsCast) {
+        const M = this.#grimoire;
+        this.#math.seedrandom(Game.seed + '/' + spellsCast);
+
+        // Now for CC's code. This is from gamblers.win()
+        var spells=[];
+       	var selfCost=M.getSpellCost(M.spells['gambler\'s fever dream']);
+       	for (var i in M.spells)
+       	{if (i!='gambler\'s fever dream' && (M.magic-selfCost)>=M.getSpellCost(M.spells[i])*0.5) spells.push(M.spells[i]);}
+        if (!spells.length)
+            return false; // My code here. It's possible we can't afford any other spells, in which we can't even cast Gambler's
+       	var spell=this.#choose(spells);
+
+        // Resurrect Abomination summons or pops a wrinkler. Outside of Grandmapocalypse, nothing happens
+        if (spell.name === "Resurrect Abomination" && Game.elderWrath === 0) {
+            this.#log("Safe to cast Gambler's! Spell will be Resurrect Abomination.");
+            return true;
+        }
+
+        // Stretch Time lengthens/shortens current buffs. If there are no active buffs, the magic will be refunded
+        // Slightly risky, since the spell is cast 1 second later, and there might be active buffs at that point
+        if (spell.name === "Stretch Time" && !Object.keys(Game.buffs).length) {
+            this.#log("Safe to cast Gambler's! Spell will be Stretch Time and there are no active buffs.");
+            return true;
+        }
+
+        // Haggler's Charm is fine because it's what we would cast anyway, but cheaper this way.
+        if (spell.name === "Haggler's Charm") {
+            this.#log("Safe to cast Gambler's! Spell will be Haggler's Charm.");
+            return true;
+        }
+
+        this.#log("Not safe to cast Gambler's, spell would be " + spell.name);
+        return false;
+    }
+
+
   	get #grimoire() {
         return Game.Objects['Wizard tower'].minigame;
     }
@@ -397,6 +452,10 @@ class AutoPlayer {
 
     get #hagglersCharm() {
       return this.#grimoire.spells['haggler\'s charm'];
+    }
+
+    get #gamblersFeverDream() {
+      return this.#grimoire.spells['gambler\'s fever dream'];
     }
 
     #BUILDING_BUFF_NAMES = ["High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up", "Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms", "Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles", "Solar flare", "Winning streak", "Macrocosm", "Refactoring", "Cosmic nursery", "Brainstorm", "Deduplication"];
