@@ -2,7 +2,6 @@ class AutoPlayer {
 
     autoClick = true;
     autoClickShimmers = true;
-    autoPledge = false; // This should never have been a feature. Pledging cost multiplies by 8 each time!
     autoChristmas = true;
     autoGarden = false; // Got the 1000-plant achievement. The next stage of auto-gardening will be more involved, if we get there.
     autoGodzamok = true;
@@ -81,8 +80,6 @@ class AutoPlayer {
             return;
         }
 
-        if (this.autoPledge)
-            this.#pledgeToTheElders(); // It's safe to call this often, it will check if it's needed
         if (this.autoClickFortune)
             this.#clickFortune();
         if (this.autoClickShimmers)
@@ -135,15 +132,6 @@ class AutoPlayer {
 
         // Godzamok lasts 10 seconds, and we really want to rinse it, so timeout for 10.5s
         this.#godzamokLoopTimeout = setTimeout(this.#godzamokLoop.bind(this), 10500);
-    }
-
-
-    #pledgeToTheElders() {
-        const elderPledgeButton = document.querySelector('.upgrade[data-id="74"]');
-        if (elderPledgeButton && elderPledgeButton.classList.contains('enabled')) {
-            this.#log('Pledging to the elders!');
-            elderPledgeButton.click();
-        }
     }
 
 
