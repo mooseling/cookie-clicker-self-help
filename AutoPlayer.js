@@ -83,6 +83,8 @@ class AutoPlayer {
 
         if (this.autoPledge)
             this.#pledgeToTheElders(); // It's safe to call this often, it will check if it's needed
+        if (this.autoClickFortune)
+            this.#clickFortune();
         if (this.autoClickShimmers)
             this.#clickShimmers();
         if (this.autoChristmas)
