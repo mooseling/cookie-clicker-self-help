@@ -310,6 +310,8 @@ class AutoPlayer {
 
 
     #goldenComboIsHappening() {
+        if (Game.buffs['Elder frenzy'])
+            return true; // Edler frenzy is usually better a golden combo. Building Special needs to hit a building with amount 950 to equal it.
         if (!Game.buffs.Frenzy)
             return false;
         return this.#BUILDING_BUFF_NAMES.some(name => Game.buffs[name]);
