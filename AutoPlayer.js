@@ -440,6 +440,28 @@ class AutoPlayer {
     }
 
 
+    // Max-magic and the magic cost of spells scale with the number of Wizard Towers
+    // Therefore, even if we can't cast a spell, we can possibly sell wizard towers until the price is below our current magic
+    // In fact, we want to stop selling when our current magic equals max-magic
+    // This will leave us with the most magic leftover after casting the spell
+    getTowerCountToHitMaxMagic(remainingMagic) {
+        const currentTowerCount = this.#grimoire.parent.amount;
+        for (let newTowerCount = currentTowerCount; newTowerCount > 0; newTowerCount--) {
+            if (this.computeMagicM(newTowerCount) <= remainingMagic)
+                return newTowerCount;
+        }
+
+        return false;
+    }
+
+
+    // Taken from CC, but modified to return the value instead of setting it
+    computeMagicM(towerCount) {
+        var lvl = Math.max(this.#grimoire.parent.level, 1);
+        return Math.floor(4 + Math.pow(towerCount, 0.6) + Math.log((towerCount + (lvl - 1) * 10) / 15 + 1) * 15);
+    }
+
+
   	get #grimoire() {
         return Game.Objects['Wizard tower'].minigame;
     }
