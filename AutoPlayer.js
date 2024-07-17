@@ -264,6 +264,12 @@ class AutoPlayer {
         if (this.#goldenComboIsHappening() && !this.#clickFrenzyIsHappening()) {
             this.#log("Golden combo is happening!");
 
+            // If we're about to combo off, let's ditch the wrinklers
+            // It could be that we're better off without them anyway, but that's some maths for another time
+            const activeWrinklers = Game.wrinklers.filter(wrinkler => wrinkler.phase > 0);
+            activeWrinklers.forEach(wrinkler => Game.PopRandomWrinkler());
+
+
             const forceCost = this.#grimoire.getSpellCost(this.#forceTheHandOfFate);
 
             let numSpellsRequired = this.#numSpellsBeforeClickFrenzy()
