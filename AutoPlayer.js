@@ -7,10 +7,10 @@ class AutoPlayer {
     autoGodzamok = true;
     autoHarvestLumps = true;
     autoClickFortune = true;
-    autoWrinkle = true;
+    autoWrinkle = false;
     autoEndGame = true;
 
-    godzamokFarmCountNormal = 890;
+    godzamokFarmCountNormal = 900;
     godzamokFarmCountEndGame = 970;
 
     #running;
