@@ -261,51 +261,107 @@ class AutoPlayer {
 
 
     #endGameLoop() {
-        if (this.#goldenComboIsHappening() && !this.#clickFrenzyIsHappening()) {
-            this.#log("Golden combo is happening!");
+        if (this.#goldenComboIsHappening()) {
+            this.lineUpCombo();
+            this.tryToComboOff();
+        }
 
-            // If we're about to combo off, let's ditch the wrinklers
-            // It could be that we're better off without them anyway, but that's some maths for another time
-            const activeWrinklers = Game.wrinklers.filter(wrinkler => wrinkler.phase > 0);
-            activeWrinklers.forEach(wrinkler => Game.PopRandomWrinkler());
+        // If a combo is not queued up, we cast either Haggler's Charm or Gambler's Fever Dream to bring it closer
+        // We choose Gambler's whenever the outcome will be a safe one. It's much cheaper!
+        if (this.#magicIsFull() && !this.comboIsLinedUp()) {
+            this.#log("Magic is full and combo is not lined up, casting a burn spell");
+            this.#grimoire.castSpell(this.#getNextBurnSpell());
+        }
+    }
 
 
-            const forceCost = this.#grimoire.getSpellCost(this.#forceTheHandOfFate);
+    lineUpCombo() {
+        let nextBurnSpell;
 
-            let numSpellsRequired = this.#numSpellsBeforeClickFrenzy()
-            let burnCost = 0;
+        while(
+            !this.comboIsLinedUp()
+            && (
+                nextBurnSpell = this.#getNextBurnSpell(),
+                this.#grimoire.magic >= this.#forceTheHandOfFate.costMin + this.#grimoire.getSpellCost(nextBurnSpell)
+            )
+        ) {
+            this.#log(`Casting ${nextBurnSpell.name}...`);
+            this.#grimoire.castSpell(nextBurnSpell);
+        }
+    }
 
-            for (let spellBurnCount = 0; spellBurnCount < numSpellsRequired; spellBurnCount++)
-                burnCost += this.#grimoire.getSpellCost(this.#getNextBurnSpell(spellBurnCount));
 
-            this.#log(`We have to burn ${numSpellsRequired} spells to reach Click Frenzy, costing ${burnCost}/${this.#grimoire.magic} magic`);
+    // For now, golden combo means there's Frenzy + Building Special happening. We're building on top of that case.
+    tryToComboOff() {
+        const towers = Game.Objects['Wizard tower'];
+        const initialTowerCount = towers.amount;
 
-            let nextBurnSpell;
-            while (
-                (this.#scryFate() === 'Click Frenzy' && this.#grimoire.magic >= forceCost)
-                || (
-                    nextBurnSpell = this.#getNextBurnSpell(),
-                    this.#grimoire.magic >= forceCost + this.#grimoire.getSpellCost(nextBurnSpell)
-                )
-            ) {
-                if (this.#scryFate() !== 'Click Frenzy') {
-                    this.#log(`Casting ${nextBurnSpell.name}...`);
-                    this.#grimoire.castSpell(nextBurnSpell);
-                } else {
-                    this.#log("Click Frenzy is next! Casting Force!");
-                    this.#grimoire.castSpell(this.#forceTheHandOfFate);
+        if (this.#clickFrenzyIsHappening()) {
+            if (this.#scryFate() === 'Building Special' && this.canCastForce()) {
+                this.#log('Full combo is happening and we can add a Building Special! Trying to cast force!');
+                this.castWithTowerSelling(this.#forceTheHandOfFate);
+            }
+        } else {
+            if (this.#scryFate() === 'Click Frenzy') {
+                if (
+                    this.canCastForce()
+                    && (!this.#scryFate(1) === 'Building Special' || this.canCastForce(2)) // Don't squander a double combo!
+                ) {
+                    this.#log('Basic golden combo is happening, and we have a Click Frenzy lined up! Casting Force!');
+                    this.castWithTowerSelling(this.#forceTheHandOfFate);
+
+                    if (this.#scryFate() === 'Building Special' && this.canCastForce()) {
+                        this.#log('Casting Force again for a bonus Building Special!');
+                        this.castWithTowerSelling(this.#forceTheHandOfFate);
+                    }
+                }
+            } else if (this.#scryFate() === 'Building Special' && this.#scryFate(1) === 'Click Frenzy') {
+                if (this.canCastForce(2)) {
+                    this.#log('Building Special is lined up, followed by Click Frenzy! Casting both!');
+                    this.castWithTowerSelling(this.#forceTheHandOfFate);
+                    this.castWithTowerSelling(this.#forceTheHandOfFate);
                 }
             }
         }
 
-        // If Force is not queued up, we cast Haggler's Charm to bring it closer
-        // But only at max magic because then magic refills faster
-        // We used to cast Gambler's Fever Dream, but that often works out poorly or costs more magic
-        // The ideal version would predict the outcome of GFD and then decide which spell to cast
-        if (this.#scryFate() !== 'Click Frenzy' && this.#magicIsFull()) {
-            this.#log("Magic is full and Click Frenzy is not next, casting a burn spell");
-            this.#grimoire.castSpell(this.#getNextBurnSpell());
+        if (towers.amount < initialTowerCount) {
+            this.#log(`Now on ${towers.amount} towers. Buying back up to ${initialTowerCount}`);
+            towers.buy(initialTowerCount - towers.amount);
         }
+    }
+
+
+    castWithTowerSelling(spell) {
+        const currentMagic = this.#grimoire.magic;
+        if (this.#grimoire.getSpellCost(spell) <= currentMagic) {
+            this.#log('Casting spell without selling any towers...');
+            this.#grimoire.castSpell(spell);
+        } else if (currentMagic >= spell.costMin) {
+            const towers = Game.Objects['Wizard tower'];
+            const targetTowerCount = this.getTowerCountToHitMaxMagic(currentMagic);
+            if (targetTowerCount > 0) {
+                this.#log(`Casting spell by selling ${towers.amount - targetTowerCount} towers...`);
+                towers.sell(towers.amount - targetTowerCount);
+                this.#grimoire.computeMagicM(); // Boy is this cheating, but boy does it simplify coding this
+                this.#grimoire.castSpell(this.#forceTheHandOfFate);
+            }
+        }
+    }
+
+
+    // Short-hand method to check if we can cast Force the Hand of Fate, with selling towers
+    // It's not necessary to check very often, but it means we can quieten certain logs
+    canCastForce(times = 1) {
+        return this.#grimoire.magic >= times * this.#forceTheHandOfFate.costMin;
+    }
+
+
+    // Lining up a combo is a place where we could get much more involved
+    // With selling towers and burning spells, we can line up combos in a number of different ways
+    // For now we are just lining up a Click Frenzy and Building Special next to eachother, or just a Click Frenzy
+    comboIsLinedUp() {
+        return this.#scryFate() === 'Click Frenzy'
+            || (this.#scryFate() === 'Building special' && this.#scryFate(1) === 'Click frenzy')
     }
 
 
