@@ -61,6 +61,14 @@ class AutoPlayer {
     }
 
 
+    scryFate(extraSpellsCast = 0) {
+        const spellsCastTotal = this.#grimoire.spellsCastTotal;
+        const chimeIsOn = false; // Chime is on, but Orteil seems to have changed this behaviour
+        const nextFate = this.#check_cookies(spellsCastTotal + extraSpellsCast, Game.season, chimeIsOn);
+        return nextFate;
+    }
+
+
     #fastLoop() {
         if (!this.#running) {
             this.#log('Fastloop: AutoPlayer is not running. Returning.');
@@ -297,25 +305,25 @@ class AutoPlayer {
         const initialTowerCount = towers.amount;
 
         if (this.#clickFrenzyIsHappening()) {
-            if (this.#scryFate() === 'Building Special' && this.canCastForce()) {
+            if (this.scryFate() === 'Building Special' && this.canCastForce()) {
                 this.#log('Full combo is happening and we can add a Building Special! Trying to cast force!');
                 this.castWithTowerSelling(this.#forceTheHandOfFate);
             }
         } else {
-            if (this.#scryFate() === 'Click Frenzy') {
+            if (this.scryFate() === 'Click Frenzy') {
                 if (
                     this.canCastForce()
-                    && (!this.#scryFate(1) === 'Building Special' || this.canCastForce(2)) // Don't squander a double combo!
+                    && (!this.scryFate(1) === 'Building Special' || this.canCastForce(2)) // Don't squander a double combo!
                 ) {
                     this.#log('Basic golden combo is happening, and we have a Click Frenzy lined up! Casting Force!');
                     this.castWithTowerSelling(this.#forceTheHandOfFate);
 
-                    if (this.#scryFate() === 'Building Special' && this.canCastForce()) {
+                    if (this.scryFate() === 'Building Special' && this.canCastForce()) {
                         this.#log('Casting Force again for a bonus Building Special!');
                         this.castWithTowerSelling(this.#forceTheHandOfFate);
                     }
                 }
-            } else if (this.#scryFate() === 'Building Special' && this.#scryFate(1) === 'Click Frenzy') {
+            } else if (this.scryFate() === 'Building Special' && this.scryFate(1) === 'Click Frenzy') {
                 if (this.canCastForce(2)) {
                     this.#log('Building Special is lined up, followed by Click Frenzy! Casting both!');
                     this.castWithTowerSelling(this.#forceTheHandOfFate);
@@ -360,8 +368,8 @@ class AutoPlayer {
     // With selling towers and burning spells, we can line up combos in a number of different ways
     // For now we are just lining up a Click Frenzy and Building Special next to eachother, or just a Click Frenzy
     comboIsLinedUp() {
-        return this.#scryFate() === 'Click Frenzy'
-            || (this.#scryFate() === 'Building special' && this.#scryFate(1) === 'Click frenzy')
+        return this.scryFate() === 'Click Frenzy'
+            || (this.scryFate() === 'Building special' && this.scryFate(1) === 'Click frenzy')
     }
 
 
@@ -381,7 +389,7 @@ class AutoPlayer {
 
     #numSpellsBeforeClickFrenzy() {
         for (let spellsToCast = 0; spellsToCast < 20; spellsToCast++) {
-            if (this.#scryFate(spellsToCast) === 'Click Frenzy')
+            if (this.scryFate(spellsToCast) === 'Click Frenzy')
                 return spellsToCast;
         }
         return 200; // Not true, but fine for our purposes. We won't go for a combo in this case.
@@ -394,14 +402,6 @@ class AutoPlayer {
         const maxMagic = this.#grimoire.magicM;
 
         return magic === maxMagic;
-    }
-
-
-    #scryFate(extraSpellsCast = 0) {
-        const spellsCastTotal = this.#grimoire.spellsCastTotal;
-        const chimeIsOn = false; // Chime is on, but Orteil seems to have changed this behaviour
-        const nextFate = this.#check_cookies(spellsCastTotal + extraSpellsCast, Game.season, chimeIsOn);
-        return nextFate;
     }
 
 
