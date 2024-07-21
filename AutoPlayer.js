@@ -61,6 +61,13 @@ class AutoPlayer {
     }
 
 
+
+    // ========================== Public Endgame Functions ==========================
+    // We expose some helpful functions for the user to do big combos
+    // AutoPlayer already tries to play out the endgame, hitting big combos
+    // But doing it programmatically is turning into a massive rabbit hole
+
+
     scryFate(extraSpellsCast = 0) {
         const spellsCastTotal = this.#grimoire.spellsCastTotal;
         const chimeIsOn = false; // Chime is on, but Orteil seems to have changed this behaviour
@@ -74,6 +81,28 @@ class AutoPlayer {
             .map((_, i) => this.scryFate(i))
             .join(', ');
     }
+
+
+    sellTowersToHitMaxMagic() {
+        const targetTowerCount = this.#getTowerCountToHitMaxMagic(currentMagic);
+        const towers = Game.Objects['Wizard tower'];
+        this.#log("Towers were at " + towers.amount);
+        towers.sell(towers.amount - targetTowerCount);
+    }
+
+
+    getNextBurnSpell(lookAhead = 0) {
+      const spellsCast = this.#grimoire.spellsCastTotal
+
+      if (this.#safeToCastGamblers(spellsCast + lookAhead))
+        return this.#gamblersFeverDream;
+
+      return this.#hagglersCharm;
+    }
+
+
+
+    // ========================== Internal Loops ==========================
 
 
     #fastLoop() {
@@ -148,6 +177,10 @@ class AutoPlayer {
         // Godzamok lasts 10 seconds, and we really want to rinse it, so timeout for 10.5s
         this.#godzamokLoopTimeout = setTimeout(this.#godzamokLoop.bind(this), 10500);
     }
+
+
+
+    // ========================== Other Private Functions ==========================
 
 
     // Shimmers are golden cookies and reindeer. We want to auto-click both.
@@ -277,26 +310,26 @@ class AutoPlayer {
 
     #endGameLoop() {
         if (this.#goldenComboIsHappening()) {
-            this.lineUpCombo();
+            this.#lineUpCombo();
             this.tryToComboOff();
         }
 
         // If a combo is not queued up, we cast either Haggler's Charm or Gambler's Fever Dream to bring it closer
         // We choose Gambler's whenever the outcome will be a safe one. It's much cheaper!
-        if (this.#magicIsFull() && !this.comboIsLinedUp()) {
+        if (this.#magicIsFull() && !this.#comboIsLinedUp()) {
             this.#log("Magic is full and combo is not lined up, casting a burn spell");
-            this.#grimoire.castSpell(this.#getNextBurnSpell());
+            this.#grimoire.castSpell(this.getNextBurnSpell());
         }
     }
 
 
-    lineUpCombo() {
+    #lineUpCombo() {
         let nextBurnSpell;
 
         while(
-            !this.comboIsLinedUp()
+            !this.#comboIsLinedUp()
             && (
-                nextBurnSpell = this.#getNextBurnSpell(),
+                nextBurnSpell = this.getNextBurnSpell(),
                 this.#grimoire.magic >= this.#forceTheHandOfFate.costMin + this.#grimoire.getSpellCost(nextBurnSpell)
             )
         ) {
@@ -312,29 +345,29 @@ class AutoPlayer {
         const initialTowerCount = towers.amount;
 
         if (this.#clickFrenzyIsHappening()) {
-            if (this.scryFate() === 'Building Special' && this.canCastForce()) {
+            if (this.scryFate() === 'Building Special' && this.#canCastForce()) {
                 this.#log('Full combo is happening and we can add a Building Special! Trying to cast force!');
-                this.castWithTowerSelling(this.#forceTheHandOfFate);
+                this.#castWithTowerSelling(this.#forceTheHandOfFate);
             }
         } else {
             if (this.scryFate() === 'Click Frenzy') {
                 if (
-                    this.canCastForce()
-                    && (!this.scryFate(1) === 'Building Special' || this.canCastForce(2)) // Don't squander a double combo!
+                    this.#canCastForce()
+                    && (!this.scryFate(1) === 'Building Special' || this.#canCastForce(2)) // Don't squander a double combo!
                 ) {
                     this.#log('Basic golden combo is happening, and we have a Click Frenzy lined up! Casting Force!');
-                    this.castWithTowerSelling(this.#forceTheHandOfFate);
+                    this.#castWithTowerSelling(this.#forceTheHandOfFate);
 
-                    if (this.scryFate() === 'Building Special' && this.canCastForce()) {
+                    if (this.scryFate() === 'Building Special' && this.#canCastForce()) {
                         this.#log('Casting Force again for a bonus Building Special!');
-                        this.castWithTowerSelling(this.#forceTheHandOfFate);
+                        this.#castWithTowerSelling(this.#forceTheHandOfFate);
                     }
                 }
             } else if (this.scryFate() === 'Building Special' && this.scryFate(1) === 'Click Frenzy') {
-                if (this.canCastForce(2)) {
+                if (this.#canCastForce(2)) {
                     this.#log('Building Special is lined up, followed by Click Frenzy! Casting both!');
-                    this.castWithTowerSelling(this.#forceTheHandOfFate);
-                    this.castWithTowerSelling(this.#forceTheHandOfFate);
+                    this.#castWithTowerSelling(this.#forceTheHandOfFate);
+                    this.#castWithTowerSelling(this.#forceTheHandOfFate);
                 }
             }
         }
@@ -346,14 +379,14 @@ class AutoPlayer {
     }
 
 
-    castWithTowerSelling(spell) {
+    #castWithTowerSelling(spell) {
         const currentMagic = this.#grimoire.magic;
         if (this.#grimoire.getSpellCost(spell) <= currentMagic) {
             this.#log('Casting spell without selling any towers...');
             this.#grimoire.castSpell(spell);
         } else if (currentMagic >= spell.costMin) {
             const towers = Game.Objects['Wizard tower'];
-            const targetTowerCount = this.getTowerCountToHitMaxMagic(currentMagic);
+            const targetTowerCount = this.#getTowerCountToHitMaxMagic(currentMagic);
             if (targetTowerCount > 0) {
                 this.#log(`Casting spell by selling ${towers.amount - targetTowerCount} towers...`);
                 towers.sell(towers.amount - targetTowerCount);
@@ -366,7 +399,7 @@ class AutoPlayer {
 
     // Short-hand method to check if we can cast Force the Hand of Fate, with selling towers
     // It's not necessary to check very often, but it means we can quieten certain logs
-    canCastForce(times = 1) {
+    #canCastForce(times = 1) {
         return this.#grimoire.magic >= times * this.#forceTheHandOfFate.costMin;
     }
 
@@ -374,7 +407,7 @@ class AutoPlayer {
     // Lining up a combo is a place where we could get much more involved
     // With selling towers and burning spells, we can line up combos in a number of different ways
     // For now we are just lining up a Click Frenzy and Building Special next to eachother, or just a Click Frenzy
-    comboIsLinedUp() {
+    #comboIsLinedUp() {
         return this.scryFate() === 'Click Frenzy'
             || (this.scryFate() === 'Building special' && this.scryFate(1) === 'Click frenzy')
     }
@@ -391,15 +424,6 @@ class AutoPlayer {
 
     #clickFrenzyIsHappening() {
         return Game.buffs['Click frenzy'] !== undefined;
-    }
-
-
-    #numSpellsBeforeClickFrenzy() {
-        for (let spellsToCast = 0; spellsToCast < 20; spellsToCast++) {
-            if (this.scryFate(spellsToCast) === 'Click Frenzy')
-                return spellsToCast;
-        }
-        return 200; // Not true, but fine for our purposes. We won't go for a combo in this case.
     }
 
 
@@ -453,16 +477,6 @@ class AutoPlayer {
   	}
 
 
-    #getNextBurnSpell(lookAhead = 0) {
-      const spellsCast = this.#grimoire.spellsCastTotal
-
-      if (this.#safeToCastGamblers(spellsCast + lookAhead))
-        return this.#gamblersFeverDream;
-
-      return this.#hagglersCharm;
-    }
-
-
     // We often cast a spell just to increase the spell count. Gambler's Fever Dream is very cheap.
     // However, it usually casts another spell, and the total cost will be more than casting Haggler's Charm
     // Unless we hit a spell that currently does nothing, which will be free!
@@ -507,7 +521,7 @@ class AutoPlayer {
     // Therefore, even if we can't cast a spell, we can possibly sell wizard towers until the price is below our current magic
     // In fact, we want to stop selling when our current magic equals max-magic
     // This will leave us with the most magic leftover after casting the spell
-    getTowerCountToHitMaxMagic(remainingMagic) {
+    #getTowerCountToHitMaxMagic(remainingMagic) {
         const currentTowerCount = this.#grimoire.parent.amount;
         for (let newTowerCount = currentTowerCount; newTowerCount > 0; newTowerCount--) {
             if (this.computeMagicM(newTowerCount) <= remainingMagic)
