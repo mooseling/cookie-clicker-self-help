@@ -92,6 +92,7 @@ class AutoPlayer {
 
 
     sellTowersToHitMaxMagic() {
+        const currentMagic = this.#grimoire.magic;
         const targetTowerCount = this.#getTowerCountToHitMaxMagic(currentMagic);
         const towers = Game.Objects['Wizard tower'];
         this.#log("Towers were at " + towers.amount);
