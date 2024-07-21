@@ -69,6 +69,13 @@ class AutoPlayer {
     }
 
 
+    listUpcomingFates(fateCount = 10) {
+        return Array.from(new Array(fateCount))
+            .map((_, i) => this.scryFate(i))
+            .join(', ');
+    }
+
+
     #fastLoop() {
         if (!this.#running) {
             this.#log('Fastloop: AutoPlayer is not running. Returning.');
