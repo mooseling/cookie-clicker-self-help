@@ -322,9 +322,17 @@ class AutoPlayer {
 
 
     #endGameLoop() {
+        const towers = Game.Objects['Wizard tower'];
+        const initialTowerCount = towers.amount;
+
         if (this.#goldenComboIsHappening()) {
             this.#lineUpCombo();
             this.tryToComboOff();
+        }
+
+        if (towers.amount < initialTowerCount) {
+            this.#log(`Now on ${towers.amount} towers. Buying back up to ${initialTowerCount}`);
+            towers.buy(initialTowerCount - towers.amount);
         }
 
         // If a combo is not queued up, we cast either Haggler's Charm or Gambler's Fever Dream to bring it closer
@@ -347,16 +355,13 @@ class AutoPlayer {
             )
         ) {
             this.#log(`Casting ${nextBurnSpell.name}...`);
-            this.#grimoire.castSpell(nextBurnSpell);
+            this.#castWithTowerSelling(nextBurnSpell);
         }
     }
 
 
     // For now, golden combo means there's Frenzy + Building Special happening. We're building on top of that case.
     tryToComboOff() {
-        const towers = Game.Objects['Wizard tower'];
-        const initialTowerCount = towers.amount;
-
         if (this.#clickFrenzyIsHappening()) {
             if (this.scryFate() === 'Building Special' && this.#canCastForce()) {
                 this.#log('Full combo is happening and we can add a Building Special! Trying to cast force!');
@@ -384,24 +389,22 @@ class AutoPlayer {
                 }
             }
         }
-
-        if (towers.amount < initialTowerCount) {
-            this.#log(`Now on ${towers.amount} towers. Buying back up to ${initialTowerCount}`);
-            towers.buy(initialTowerCount - towers.amount);
-        }
     }
 
 
+    // Selling towers before casting a spell should always mean we cast the spell for cheaper
     #castWithTowerSelling(spell) {
         const currentMagic = this.#grimoire.magic;
-        if (this.#grimoire.getSpellCost(spell) <= currentMagic) {
-            this.#log('Casting spell without selling any towers...');
-            this.#grimoire.castSpell(spell);
-        } else if (currentMagic >= spell.costMin) {
+        const targetTowerCount = this.#getTowerCountToHitMaxMagic(currentMagic);
+
+        if (currentMagic >= spell.costMin && targetTowerCount > 0) {
             const towers = Game.Objects['Wizard tower'];
-            const targetTowerCount = this.#getTowerCountToHitMaxMagic(currentMagic);
-            if (targetTowerCount > 0) {
-                this.#log(`Casting spell by selling ${towers.amount - targetTowerCount} towers...`);
+
+            if (towers.amount === targetTowerCount) {
+                this.#log('Casting spell without selling any towers...');
+                this.#grimoire.castSpell(spell);
+            } else {
+                this.#log(`Selling ${towers.amount - targetTowerCount} towers and then casting spell...`);
                 towers.sell(towers.amount - targetTowerCount);
                 this.#grimoire.computeMagicM(); // Boy is this cheating, but boy does it simplify coding this
                 this.#grimoire.castSpell(this.#forceTheHandOfFate);
