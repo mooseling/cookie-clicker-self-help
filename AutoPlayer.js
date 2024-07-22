@@ -13,6 +13,8 @@ class AutoPlayer {
     godzamokFarmCountNormal = 900;
     godzamokFarmCountEndGame = 970;
 
+    #shimmersClicked = 0;
+
     #running;
     #fastLoopTimeout;
     #oftenLoopTimeout;
@@ -158,9 +160,10 @@ class AutoPlayer {
 
         this.#log('Cookies: ' + Game.cookies);
 
-        const grimoire = Game.Objects['Wizard tower'].minigame;
-        const magic = grimoire.magic;
+        const magic = this.#grimoire.magic;
         this.#log('Magic: ' + magic);
+
+        this.#log('Shimmers clicked: ' + this.#shimmersClicked);
 
         this.#fifteenMinuteLoopTimeout = setTimeout(this.#fifteenMinuteLoop.bind(this), 900000);
     }
@@ -186,12 +189,21 @@ class AutoPlayer {
 
     // Shimmers are golden cookies and reindeer. We want to auto-click both.
     #clickShimmers() {
-        let shimmers = document.getElementById('shimmers').children;
-        if (shimmers.length)
-            this.#log('Clicking shimmers! There are ' + shimmers.length + ' shimmers.');
+        const shimmerContainer = document.getElementById('shimmers');
+        let shimmers = shimmerContainer.children;
+
+        if (shimmers.length > 10) {
+            this.#log(`Cookie storm! ${shimmers.length} shimmers!`);
+            setTimeout(this.#clickShimmers.bind(this), 500);
+        }
+
         while (shimmers.length) {
-            shimmers.item(0)?.click();
-            shimmers = document.getElementById('shimmers').children;
+            const shimmer = shimmers.item(0);
+            if (shimmer) {
+                shimmer.click();
+                this.#shimmersClicked++;
+            }
+            shimmers = shimmerContainer.children;
         }
     }
 
