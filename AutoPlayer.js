@@ -355,7 +355,7 @@ class AutoPlayer {
                 this.#grimoire.magic >= this.#forceTheHandOfFate.costMin + this.#grimoire.getSpellCost(nextBurnSpell)
             )
         ) {
-            this.#log(`Casting ${nextBurnSpell.name}...`);
+            this.#log(`Golden combo is happening, trying to line up buffs. Casting ${nextBurnSpell.name}...`);
             this.#castWithTowerSelling(nextBurnSpell);
         }
     }
