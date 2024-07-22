@@ -10,6 +10,7 @@ class AutoPlayer {
     autoWrinkle = false;
     autoEndGame = true;
 
+    fastLoopTime = 50; // We used to do 0, but the page is freezing. Possibly from other extensions. Anyway, nice to control this rate.
     godzamokFarmCountNormal = 900;
     godzamokFarmCountEndGame = 970;
 
@@ -117,7 +118,7 @@ class AutoPlayer {
         if (this.autoClick)
             Game.ClickCookie();
 
-        this.#fastLoopTimeout = setTimeout(this.#fastLoop.bind(this), 0);
+        this.#fastLoopTimeout = setTimeout(this.#fastLoop.bind(this), this.fastLoopTime);
     }
 
 
