@@ -61,14 +61,6 @@ class AutoPlayer {
     }
 
 
-    // Whenever I update this class, this is what I do. Might as well chuck it in a function.
-    reload(variableName = 'autoPlayer') {
-        window[variableName].stop();
-        window[variableName] = new AutoPlayer();
-        window[variableName].run();
-    }
-
-
 
     // ========================== Public Endgame Functions ==========================
     // We expose some helpful functions for the user to do big combos
