@@ -193,9 +193,9 @@ class AutoPlayer {
         const shimmerContainer = document.getElementById('shimmers');
         let shimmers = shimmerContainer.children;
 
-        if (shimmers.length > 10) {
+        if (shimmers.length > 6) {
             this.log(`Cookie storm! ${shimmers.length} shimmers!`);
-            setTimeout(this.clickShimmers.bind(this), 500);
+            setTimeout(this.clickShimmers.bind(this), 1000); // Used to be 500ms, but that was too fast! Wouldn't be enough cookies yet.
         }
 
         while (shimmers.length) {
