@@ -359,7 +359,7 @@ class AutoPlayer {
             !this.comboIsLinedUp()
             && (
                 nextBurnSpell = this.getNextBurnSpell(),
-                this.grimoire.magic >= this.forceTheHandOfFate.costMin + this.getSpellCost(nextBurnSpell, this.grimoire.magic)
+                this.grimoire.magic >= this.getMinSpellCost(this.forceTheHandOfFate) + this.getSpellCost(nextBurnSpell, this.grimoire.magic)
             )
         ) {
             this.log(`Golden combo is happening, trying to line up buffs. Casting ${nextBurnSpell.name}...`);
@@ -404,6 +404,15 @@ class AutoPlayer {
             out += maxMagic * spell.costPercent;
         out *= 1 - 0.1 * Game.auraMult('Supreme Intellect');
         return Math.floor(out);
+    }
+
+
+    getMinSpellCost(spell) {
+        const towers = Game.Objects['Wizard tower'];
+        const towerCount = 1;
+        var lvl = towers.level || 1;
+        const minMagic = Math.floor(4 + Math.pow(towerCount, 0.6) + Math.log(( towerCount + (lvl-1) * 10) / 15 + 1) * 15);
+        return this.getSpellCost(spell, minMagic);
     }
 
 
@@ -452,7 +461,7 @@ class AutoPlayer {
         const currentMagic = this.grimoire.magic;
         const targetTowerCount = this.getTowerCountToHitMaxMagic(currentMagic);
 
-        if (currentMagic >= spell.costMin && targetTowerCount > 0) {
+        if (currentMagic >= this.getMinSpellCost(spell) && targetTowerCount > 0) {
             const towers = Game.Objects['Wizard tower'];
 
             if (towers.amount === targetTowerCount) {
@@ -471,7 +480,7 @@ class AutoPlayer {
     // Short-hand method to check if we can cast Force the Hand of Fate, with selling towers
     // It's not necessary to check very often, but it means we can quieten certain logs
     canCastForce(times = 1) {
-        return this.grimoire.magic >= times * this.forceTheHandOfFate.costMin;
+        return this.grimoire.magic >= times * this.getMinSpellCost(this.forceTheHandOfFate);
     }
 
 
