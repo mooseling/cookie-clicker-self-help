@@ -45,10 +45,10 @@ class AutoPlayer {
         this.running = true;
 
         this.log('Starting loops');
-        this.fastLoop();
-        this.oftenLoop();
-        this.fifteenMinuteLoop();
-        this.godzamokLoop();
+        this.#fastLoop();
+        this.#oftenLoop();
+        this.#fifteenMinuteLoop();
+        this.#godzamokLoop();
     }
 
 
@@ -109,7 +109,7 @@ class AutoPlayer {
     // ========================== Internal Loops ==========================
 
 
-    fastLoop() {
+    #fastLoop() {
         if (!this.running) {
             this.log('Fastloop: AutoPlayer is not running. Returning.');
             return;
@@ -118,11 +118,11 @@ class AutoPlayer {
         if (this.autoClick)
             Game.ClickCookie();
 
-        this.fastLoopTimeout = setTimeout(this.fastLoop.bind(this), this.fastLoopTime);
+        this.fastLoopTimeout = setTimeout(this.#fastLoop.bind(this), this.fastLoopTime);
     }
 
 
-    oftenLoop() {
+    #oftenLoop() {
         if (!this.running) {
             this.log('Often Loop: AutoPlayer is not running. Returning.');
             return;
@@ -137,15 +137,15 @@ class AutoPlayer {
         if (this.autoHarvestLumps)
             this.harvestRipeLumps();
         if (this.autoWrinkle)
-            this.MaintainWrinklerPopulation();
+            this.maintainWrinklerPopulation();
         if (this.autoEndGame)
-            this.endGameLoop()
+            this.#endGameLoop()
 
-        this.oftenLoopTimeout = setTimeout(this.oftenLoop.bind(this), 3500); // 3.5 seconds for better comboing, and cookie storms
+        this.oftenLoopTimeout = setTimeout(this.#oftenLoop.bind(this), 3500); // 3.5 seconds for better comboing, and cookie storms
     }
 
 
-    fifteenMinuteLoop() {
+    #fifteenMinuteLoop() {
         this.log('15m Loop: Firing');
 
         if (!this.running) {
@@ -166,11 +166,11 @@ class AutoPlayer {
 
         this.log('Shimmers clicked: ' + this.shimmersClicked);
 
-        this.fifteenMinuteLoopTimeout = setTimeout(this.fifteenMinuteLoop.bind(this), 900000);
+        this.fifteenMinuteLoopTimeout = setTimeout(this.#fifteenMinuteLoop.bind(this), 900000);
     }
 
 
-    godzamokLoop() {
+    #godzamokLoop() {
         if (!this.running) {
             this.log('Godzamok Loop: AutoPlayer is not running. Returning.');
             return;
@@ -180,7 +180,7 @@ class AutoPlayer {
             this.triggerGodzamok();
 
         // Godzamok lasts 10 seconds, and we really want to rinse it, so timeout for 10.5s
-        this.godzamokLoopTimeout = setTimeout(this.godzamokLoop.bind(this), 10500);
+        this.godzamokLoopTimeout = setTimeout(this.#godzamokLoop.bind(this), 10500);
     }
 
 
@@ -306,7 +306,7 @@ class AutoPlayer {
 
     // Popping wrinklers can help unlock eggs and halloween cookies
     // Wrinkler count doesn't affect their spawn rate, so we aim to maintain a high wrinkler count and maximise pops
-    MaintainWrinklerPopulation() {
+    maintainWrinklerPopulation() {
         const activeWrinklers = Game.wrinklers.filter(wrinkler => wrinkler.phase === 2);
         if (activeWrinklers.length === 12) {
             this.log("12 Wrinklers! Popping 1.")
@@ -322,7 +322,7 @@ class AutoPlayer {
     // Since we're already auto-clicking and auto-Godzamoking, this should be enough to automate the end game
 
 
-    endGameLoop() {
+    #endGameLoop() {
         const towers = Game.Objects['Wizard tower'];
         const initialTowerCount = towers.amount;
 
