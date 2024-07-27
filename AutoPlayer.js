@@ -14,6 +14,8 @@ class AutoPlayer {
     godzamokFarmCountNormal = 900;
     godzamokFarmCountEndGame = 970;
 
+    saves = [];
+
     shimmersClicked = 0;
 
     running;
@@ -145,8 +147,9 @@ class AutoPlayer {
     }
 
 
+    // Mainly we just do a bunch of logging every 15 minutes
     #fifteenMinuteLoop() {
-        this.log('15m Loop: Firing');
+        this.log('====================================================');
 
         if (!this.running) {
             this.log('15m Loop: AutoPlayer is not running. Returning.')
@@ -165,6 +168,15 @@ class AutoPlayer {
         this.log('Magic: ' + magic);
 
         this.log('Shimmers clicked: ' + this.shimmersClicked);
+
+        // Sometimes a human could have played better. In case we missed any great opportunities, we keep some saves around.
+        this.saves.push(localStorageGet(Game.SaveTo));
+        this.log(`Saved to save[${this.saves.length - 1}]`);
+
+        this.log('Upcoming fates:');
+        this.log(this.listUpcomingFates(15))
+
+        this.log('====================================================');
 
         this.fifteenMinuteLoopTimeout = setTimeout(this.#fifteenMinuteLoop.bind(this), 900000);
     }
