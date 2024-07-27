@@ -597,24 +597,24 @@ class AutoPlayer {
 
         // Resurrect Abomination summons or pops a wrinkler. Outside of Grandmapocalypse, nothing happens
         if (spell.name === "Resurrect Abomination" && Game.elderWrath === 0) {
-            this.log("Safe to cast Gambler's! Spell will be Resurrect Abomination.");
+            this.debug("Safe to cast Gambler's! Spell will be Resurrect Abomination.");
             return true;
         }
 
         // Stretch Time lengthens/shortens current buffs. If there are no active buffs, the magic will be refunded
         // Slightly risky, since the spell is cast 1 second later, and there might be active buffs at that point
         if (spell.name === "Stretch Time" && !Object.keys(Game.buffs).length) {
-            this.log("Safe to cast Gambler's! Spell will be Stretch Time and there are no active buffs.");
+            this.debug("Safe to cast Gambler's! Spell will be Stretch Time and there are no active buffs.");
             return true;
         }
 
         // Haggler's Charm is fine because it's what we would cast anyway, but cheaper this way.
         if (spell.name === "Haggler's Charm") {
-            this.log("Safe to cast Gambler's! Spell will be Haggler's Charm.");
+            this.debug("Safe to cast Gambler's! Spell will be Haggler's Charm.");
             return true;
         }
 
-        this.log("Not safe to cast Gambler's, spell would be " + spell.name);
+        this.debug("Not safe to cast Gambler's, spell would be " + spell.name);
         return false;
     }
 
@@ -666,10 +666,15 @@ class AutoPlayer {
     choose(arr) {return arr[Math.floor(this.math.random()*arr.length)];}
 
 
-    log(message) {
+    log(message, level = 'log') {
         const date = new Date();
         const timeString = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 
-        console.log(timeString + ' - ' + message);
+        switch (level) {
+            case 'debug':
+                console.debug(timeString + ' - ' + message);
+            default:
+                console.log(timeString + ' - ' + message);
+        }
     }
 }
