@@ -394,16 +394,16 @@ class AutoPlayer {
 
 
     getMaxSpellsWeCanBurn() {
+        let minForceCost = this.getMinSpellCost(this.forceTheHandOfFate);
+
         let currentMagic = this.grimoire.magic;
-        let forceCost = this.getSpellCost(this.forceTheHandOfFate, currentMagic);
         let spellsBurnt = 0;
 
-        while(currentMagic > forceCost) {
+        while(currentMagic > minForceCost) {
             const nextBurnSpell = this.getNextBurnSpell(spellsBurnt);
             const burnCost = this.getSpellCost(nextBurnSpell, currentMagic);
             currentMagic -= burnCost;
             spellsBurnt++;
-            forceCost = this.getSpellCost(this.forceTheHandOfFate, currentMagic);
         }
 
         return spellsBurnt - 1;
