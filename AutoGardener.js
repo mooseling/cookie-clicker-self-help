@@ -26,9 +26,11 @@ class AutoGardener {
         if (!this.running)
             return;
 
+        this.log("Pottering...");
+
         this.juicyQueenbeetStrategy();
 
-        this.loopTimeout = setTimeout(this.loop.bind(this), 30_000);
+        this.loopTimeout = setTimeout(this.loop.bind(this), 170_000); // Every 2m50s, enough to catch each garden tick
     }
 
 
