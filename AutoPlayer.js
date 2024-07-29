@@ -669,12 +669,13 @@ class AutoPlayer {
     log(message, level = 'log') {
         const date = new Date();
         const timeString = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        const preamble = timeString + ' - ' + 'AutoPlayer';
 
         switch (level) {
             case 'debug':
-                console.debug(timeString + ' - ' + message);
+                console.debug(preamble + ' - ' + message);
             default:
-                console.log(timeString + ' - ' + message);
+                console.log(preamble + ' - ' + message);
         }
     }
 }
