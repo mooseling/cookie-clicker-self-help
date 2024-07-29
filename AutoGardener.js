@@ -7,12 +7,16 @@ class AutoGardener {
 
 
     run() {
+        this.log("Run!");
+
         this.running = true;
         this.loop();
     }
 
 
     stop() {
+        this.log("Stop!");
+
         this.running = false;
         clearTimeout(this.loopTimeout);
     }
@@ -30,14 +34,14 @@ class AutoGardener {
 
     // The first purpose of this class is to try to unlock Juicy Queenbeets
     juicyQueenbeetStrategy() {
-        this.juicyQueenBeetQuadrants.forEach(this.maintainQuadrant.bind(this));
+        this.juicyQueenBeetQuadrants.forEach((quadrant, index) => this.maintainQuadrant(quadrant, index));
         this.useBestSoilType();
     }
 
 
     // We can't just replant individual Queenbeets when they die. They take a long time to mature, and then die quickly.
     // This means, with a simple auto-planter, the quadrant very quickly becomes useless. The queenbeets will be totally out of sync.
-    maintainQuadrant({borderTiles, targetTile}) {
+    maintainQuadrant({borderTiles, targetTile}, quadrantIndex) {
         // If any border tiles are empty, a queenbeet has died. We harvest the rest and replant them all.
         const aQueenbeetHasDied = borderTiles.some(coords => {
             const plantId = this.getPlantAt(coords).id;
@@ -45,6 +49,7 @@ class AutoGardener {
         });
 
         if (aQueenbeetHasDied) {
+            this.log("Replanting border in quadrant " + quadrantIndex);
             this.harvestTiles(borderTiles);
             this.plantPlants(borderTiles, this.QUEENBEET_ID)
         }
@@ -58,10 +63,13 @@ class AutoGardener {
 
         if (id === 21) {
             // It's a juicy queenbeet! Is it mature?
-            if (age >= this.juicyQueenbeet.mature)
+            if (age >= this.juicyQueenbeet.mature) {
+                this.log("There's a Juicy Queenbeet! Harvesting!");
                 this.harvestTiles([coords]); // Yes! Harvest! Woohoo!
+            }
         } else if (id !== null) {
             // It must be a weed
+            this.log(`Found a weed or something (id ${id}), pulling it out.`);
             this.harvestTiles([coords]); // Pull it out!
         }
     }
@@ -77,8 +85,19 @@ class AutoGardener {
          : 1 // Fertilizer: age quickly
 
         // We could directly set the soil type, but there's some game logic in the click-handler. We want to make sure we're not cheating.
-        if (this.garden.soil !== bestSoil)
+        if (this.garden.soil !== bestSoil) {
+            this.log("Switching soil to " + this.getSoilName(bestSoil));
             document.getElementById('gardenSoil-'+bestSoil).click();
+        }
+    }
+
+
+    getSoilName(soilId) {
+        switch (soilId) {
+            case 1: return 'fertilizer';
+            case 4: return 'woodchips';
+            default: return soilId + '';
+        }
     }
 
 
@@ -149,5 +168,19 @@ class AutoGardener {
 
     get juicyQueenbeet() {
         return this.garden.plants.queenbeetLump;
+    }
+
+
+    log(message, level = 'log') {
+        const date = new Date();
+        const timeString = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        const preamble = timeString + ' - ' + 'AutoGardener';
+
+        switch (level) {
+            case 'debug':
+                console.debug(preamble + ' - ' + message);
+            default:
+                console.log(preamble + ' - ' + message);
+        }
     }
 }
