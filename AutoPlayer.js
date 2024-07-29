@@ -97,10 +97,10 @@ class AutoPlayer {
     }
 
 
-    getNextBurnSpell(lookAhead = 0) {
+    getNextBurnSpell(lookAhead = 0, remainingMagic = this.grimoire.magic) {
       const spellsCast = this.grimoire.spellsCastTotal
 
-      if (this.safeToCastGamblers(spellsCast + lookAhead))
+      if (this.safeToCastGamblers(spellsCast + lookAhead, remainingMagic))
         return this.gamblersFeverDream;
 
       return this.hagglersCharm;
@@ -400,7 +400,7 @@ class AutoPlayer {
         let spellsBurnt = 0;
 
         while(currentMagic > minForceCost) {
-            const nextBurnSpell = this.getNextBurnSpell(spellsBurnt);
+            const nextBurnSpell = this.getNextBurnSpell(spellsBurnt, currentMagic);
             const burnCost = this.getSpellCost(nextBurnSpell, currentMagic);
             currentMagic -= burnCost;
             spellsBurnt++;
@@ -582,15 +582,15 @@ class AutoPlayer {
     // We often cast a spell just to increase the spell count. Gambler's Fever Dream is very cheap.
     // However, it usually casts another spell, and the total cost will be more than casting Haggler's Charm
     // Unless we hit a spell that currently does nothing, which will be free!
-    safeToCastGamblers(spellsCast) {
+    safeToCastGamblers(spellsCast, remainingMagic) {
         const M = this.grimoire;
         this.math.seedrandom(Game.seed + '/' + spellsCast);
 
         // Now for CC's code. This is from gamblers.win()
         var spells=[];
-       	var selfCost=M.getSpellCost(M.spells['gambler\'s fever dream']);
+       	var selfCost=this.getSpellCost(this.gamblersFeverDream, remainingMagic);
        	for (var i in M.spells)
-       	{if (i!='gambler\'s fever dream' && (M.magic-selfCost)>=M.getSpellCost(M.spells[i])*0.5) spells.push(M.spells[i]);}
+       	{if (i!='gambler\'s fever dream' && (M.magic-selfCost)>=this.getSpellCost(M.spells[i], remainingMagic)*0.5) spells.push(M.spells[i]);}
         if (!spells.length)
             return false; // My code here. It's possible we can't afford any other spells, in which we can't even cast Gambler's
        	var spell=this.choose(spells);
