@@ -79,10 +79,10 @@ class AutoGardener {
 
     useBestSoilType() {
         const queenbeetMatureAge = this.queenbeet.mature;
-        const allQueenbeetsAreMature = this.juicyQueenBeetQuadrants.every(
+        const anyQuadrantsAreMature = this.juicyQueenBeetQuadrants.some(
             ({borderTiles}) => borderTiles.every(coords => this.getPlantAt(coords).age >= queenbeetMatureAge));
         
-        const bestSoil = allQueenbeetsAreMature
+        const bestSoil = anyQuadrantsAreMature
          ? 4 // Woodchips: increased mutation
          : 1 // Fertilizer: age quickly
 
