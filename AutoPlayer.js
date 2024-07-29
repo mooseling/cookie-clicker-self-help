@@ -597,24 +597,24 @@ class AutoPlayer {
 
         // Resurrect Abomination summons or pops a wrinkler. Outside of Grandmapocalypse, nothing happens
         if (spell.name === "Resurrect Abomination" && Game.elderWrath === 0) {
-            this.debug("Safe to cast Gambler's! Spell will be Resurrect Abomination.");
+            this.log("Safe to cast Gambler's! Spell will be Resurrect Abomination.", 'debug');
             return true;
         }
 
         // Stretch Time lengthens/shortens current buffs. If there are no active buffs, the magic will be refunded
         // Slightly risky, since the spell is cast 1 second later, and there might be active buffs at that point
         if (spell.name === "Stretch Time" && !Object.keys(Game.buffs).length) {
-            this.debug("Safe to cast Gambler's! Spell will be Stretch Time and there are no active buffs.");
+            this.log("Safe to cast Gambler's! Spell will be Stretch Time and there are no active buffs.", 'debug');
             return true;
         }
 
         // Haggler's Charm is fine because it's what we would cast anyway, but cheaper this way.
         if (spell.name === "Haggler's Charm") {
-            this.debug("Safe to cast Gambler's! Spell will be Haggler's Charm.");
+            this.log("Safe to cast Gambler's! Spell will be Haggler's Charm.", 'debug');
             return true;
         }
 
-        this.debug("Not safe to cast Gambler's, spell would be " + spell.name);
+        this.log("Not safe to cast Gambler's, spell would be " + spell.name, 'debug');
         return false;
     }
 
