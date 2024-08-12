@@ -49,3 +49,16 @@ for (const name in Game.Objects)
     totalLumpsRequired += sugarLumpsRequiredForLevel10(Game.Objects[name].level)
 
 // The answer is 817... guh
+
+
+
+function getBuildingCost(currentPrice, currentNumber, targetNumber) {
+    let cost = 0;
+
+    while(currentNumber < targetNumber) {
+        cost += currentPrice;
+        currentPrice *= 1.15;
+    }
+
+    return cost;
+}
