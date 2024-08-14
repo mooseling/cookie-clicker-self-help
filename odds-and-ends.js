@@ -58,6 +58,7 @@ function getBuildingCost(currentPrice, currentNumber, targetNumber) {
     while(currentNumber < targetNumber) {
         cost += currentPrice;
         currentPrice *= 1.15;
+        currentNumber++;
     }
 
     return cost;
