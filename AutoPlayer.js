@@ -139,7 +139,7 @@ class AutoPlayer {
         if (this.autoHarvestLumps)
             this.harvestRipeLumps();
         if (this.autoWrinkle)
-            this.maintainWrinklerPopulation();
+            this.popWrinklers();
         if (this.autoEndGame)
             this.#endGameLoop()
 
@@ -317,14 +317,15 @@ class AutoPlayer {
 
 
     // Popping wrinklers can help unlock eggs and halloween cookies
-    // Wrinkler count doesn't affect their spawn rate, so we aim to maintain a high wrinkler count and maximise pops
-    maintainWrinklerPopulation() {
+    // Each wrinkler slot has its own chance to spawn, so immediately popping them maximises pops
+    popWrinklers() {
         const activeWrinklers = Game.wrinklers.filter(wrinkler => wrinkler.phase === 2);
-        if (activeWrinklers.length === 12) {
-            this.log("12 Wrinklers! Popping 1.")
+        if (activeWrinklers.length > 0) {
+            this.log("Popping a wrinkler")
             Game.PopRandomWrinkler();
         }
     }
+
 
     // ================================= End Game =================================
     // At this point, auto-clicking and continously casting Force the Hand of Fate is not making any progress
