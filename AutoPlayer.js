@@ -10,8 +10,8 @@ class AutoPlayer {
     autoEndGame = true;
 
     fastLoopTime = 20; // We used to do 0, but the page is freezing. Possibly from other extensions. Anyway, nice to control this rate.
-    godzamokFarmCountNormal = 900;
-    godzamokFarmCountEndGame = 970;
+    godzamokFarmCountNormal = 950;
+    godzamokFarmCountEndGame = 1000;
 
     saves = [];
 
