@@ -29,8 +29,7 @@ class AutoGardener {
 
         this.log("Pottering...");
 
-        // this.juicyQueenbeetStrategy();
-        this.fillWithGoldenClover();
+        this.goldenCloverStrategy();
 
         this.loopTimeout = setTimeout(this.loop.bind(this), 170_000); // Every 2m50s, enough to catch each garden tick
     }
@@ -39,7 +38,13 @@ class AutoGardener {
     // The first purpose of this class is to try to unlock Juicy Queenbeets
     juicyQueenbeetStrategy() {
         this.juicyQueenBeetQuadrants.forEach((quadrant, index) => this.maintainQuadrant(quadrant, index));
-        this.useBestSoilType();
+        this.useBestSoilType_queenBeetStrat();
+    }
+
+
+    goldenCloverStrategy() {
+        this.fillWithGoldenClover();
+        this.useBestSoilType_GoldenCloverStrat();
     }
 
 
@@ -79,19 +84,49 @@ class AutoGardener {
     }
 
 
-    useBestSoilType() {
+    useBestSoilType_queenBeetStrat() {
         const queenbeetMatureAge = this.queenbeet.mature;
         const anyQuadrantsAreMature = this.juicyQueenBeetQuadrants.some(
             ({borderTiles}) => borderTiles.every(coords => this.getPlantAt(coords).age >= queenbeetMatureAge));
         
         const bestSoil = anyQuadrantsAreMature
-         ? 4 // Woodchips: increased mutation
-         : 1 // Fertilizer: age quickly
+         ? 4  // Woodchips: increased mutation
+         : 1; // Fertilizer: age quickly
 
+        this.setSoil(bestSoil);
+    }
+
+
+    useBestSoilType_GoldenCloverStrat() {
+        const matureAge = this.goldenClover.mature;
+        let youngClovers = 0;
+        let matureClovers = 0;
+
+        this.garden.plot.forEach((row, y) => {
+            row.forEach((tile, x) => {
+                const {id, age} = this.getPlantAt([y, x]);
+                if (id === this.GOLDEN_CLOVER_ID) {
+                    if (age < matureAge)
+                        youngClovers++;
+                    else
+                        matureClovers++;
+                }
+            });
+        });
+
+        const bestSoil = matureClovers >= youngClovers
+            ? 2  // Clay: Slow aging, increased effects
+            : 1; // Fertilizer: age quickly
+
+        this.setSoil(bestSoil);
+    }
+
+
+    setSoil(soilType) {
         // We could directly set the soil type, but there's some game logic in the click-handler. We want to make sure we're not cheating.
-        if (this.garden.soil !== bestSoil) {
-            this.log("Switching soil to " + this.getSoilName(bestSoil));
-            document.getElementById('gardenSoil-'+bestSoil).click();
+        if (this.garden.soil !== soilType) {
+            this.log("Switching soil to " + this.getSoilName(soilType));
+            document.getElementById('gardenSoil-'+soilType).click();
         }
     }
 
@@ -197,6 +232,10 @@ class AutoGardener {
 
     get garden() {
         return Game.Objects.Farm.minigame;
+    }
+
+    get goldenClover() {
+        return this.garden.plants.goldenClover;
     }
 
     get queenbeet() {
