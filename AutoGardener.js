@@ -3,6 +3,7 @@ class AutoGardener {
     running = false;
     loopTimeout;
 
+    GOLDEN_CLOVER_ID = 5;
     QUEENBEET_ID = 20;
 
 
@@ -28,7 +29,8 @@ class AutoGardener {
 
         this.log("Pottering...");
 
-        this.juicyQueenbeetStrategy();
+        // this.juicyQueenbeetStrategy();
+        this.fillWithGoldenClover();
 
         this.loopTimeout = setTimeout(this.loop.bind(this), 170_000); // Every 2m50s, enough to catch each garden tick
     }
@@ -176,14 +178,20 @@ class AutoGardener {
     }
 
 
+    // For the end-game, we want to maximise golden cookie chance
+    fillWithGoldenClover() {
+        this.fillGarden(this.GOLDEN_CLOVER_ID);
+    }
+
+
     fillGarden(plantId) {
-        for (const y of this.garden.plot) {
-            for (const x of this.garden.plot[y]) {
-                const existingPlantId = this.garden.plot[y][x][0];
-                if (!existingPlantId)
+        this.garden.plot.forEach((row, y) => {
+            row.forEach((tile, x) =>  {
+                const tileIsEmpty = tile[0] === 0;
+                if (tileIsEmpty)
                     this.plantPlant(y, x, plantId);
-            }
-        }
+            });
+        });
     }
 
 
