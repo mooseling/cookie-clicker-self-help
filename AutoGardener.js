@@ -119,7 +119,12 @@ class AutoGardener {
 
 
     plantPlants(tiles, plantId) {
-        tiles.forEach(([y, x]) => this.garden.useTool(plantId, x, y));
+        tiles.forEach(([y, x]) => this.plantPlant(y, x, plantId));
+    }
+
+
+    plantPlant(y, x, plantId) {
+        this.garden.useTool(plantId, x, y);
     }
 
     
@@ -158,6 +163,28 @@ class AutoGardener {
             targetTile: [1, 1]
         },
     ];
+
+
+    // There's an achievement for harvesting 1000 plants
+    // So we continuously harvest and refill the garden with the cheapest, fastest plant: baker's wheat
+    // The cost of this is actually kinda steep, but hopefully with golden cookies and auto-clicking, we cover it
+    // The timing is based on fertilizer, with average maturation 13 minutes. A fifteen minute loop should give us good harvests.
+    replantGardenWithBakersWheat() {
+        const harvestAllButton = document.getElementById('gardenTool-1');
+        harvestAllButton.click();
+        this.fillGarden('0');
+    }
+
+
+    fillGarden(plantId) {
+        for (const y of this.garden.plot) {
+            for (const x of this.garden.plot[y]) {
+                const existingPlantId = this.garden.plot[y][x][0];
+                if (!existingPlantId)
+                    this.plantPlant(y, x, plantId);
+            }
+        }
+    }
 
 
     get garden() {

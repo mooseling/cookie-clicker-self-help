@@ -3,7 +3,6 @@ class AutoPlayer {
     autoClick = true;
     autoClickShimmers = true;
     autoChristmas = true;
-    autoGarden = false; // Got the 1000-plant achievement. The next stage of auto-gardening will be more involved, if we get there.
     autoGodzamok = true;
     autoHarvestLumps = true;
     autoClickFortune = true;
@@ -156,12 +155,6 @@ class AutoPlayer {
             return;
         }
 
-        if (this.autoGarden) {
-            this.log('15m Loop: Auto-garden is on, replanting bakers wheat');
-            this.replantGardenWithBakersWheat();
-        }
-
-
         this.log('Cookies: ' + Game.cookies);
 
         const magic = this.grimoire.magic;
@@ -227,38 +220,6 @@ class AutoPlayer {
             this.log("Christmas is over! So sad. Let's do it again :)");
             christmasSwitch.click();
         }
-    }
-
-
-    // There's an achievement for harvesting 1000 plants
-    // So we continuously harvest and refill the garden with the cheapest, fastest plant: baker's wheat
-    // The cost of this is actually kinda steep, but hopefully with golden cookies and auto-clicking, we cover it
-    // The timing is based on fertilizer, with average maturation 13 minutes. A fifteen minute loop should give us good harvests.
-    replantGardenWithBakersWheat() {
-        const harvestAllButton = document.getElementById('gardenTool-1');
-        harvestAllButton.click();
-        this.fillGarden('0');
-    }
-
-
-    fillGarden(plantId) {
-        const gardenTileWrapper = document.getElementById('gardenPlot');
-        const tiles = gardenTileWrapper.children;
-
-        this.log('Found ' + tiles.length + ' garden tiles to fill');
-
-        for (const tile of tiles)
-            this.plantPlant(plantId, tile);
-    }
-
-
-    plantPlant(plantId, tile) {
-        const plantButton = document.getElementById('gardenSeed-' + plantId);
-        if (!plantButton)
-            return;
-
-        plantButton.click();
-        tile.click();
     }
 
 
