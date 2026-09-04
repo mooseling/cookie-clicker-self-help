@@ -8,6 +8,7 @@ class AutoPlayer {
     autoClickFortune = true;
     autoWrinkle = false;
     autoEndGame = true;
+    autoSugarFrenzy = true;
 
     fastLoopTime = 20; // We used to do 0, but the page is freezing. Possibly from other extensions. Anyway, nice to control this rate.
     godzamokFarmCountNormal = 950;
@@ -407,6 +408,7 @@ class AutoPlayer {
                 ) {
                     this.log('Basic golden combo is happening, and we have a Click Frenzy lined up! Casting Force!');
                     this.castWithTowerSelling(this.forceTheHandOfFate);
+                    this.triggerSugarFrenzy()
 
                     if (this.scryFate() === 'Building Special' && this.canCastForce()) {
                         this.log('Casting Force again for a bonus Building Special!');
@@ -420,7 +422,8 @@ class AutoPlayer {
                     this.log('Building Special is lined up, followed by Click Frenzy! Casting both!');
                     this.castWithTowerSelling(this.forceTheHandOfFate);
                     this.castWithTowerSelling(this.forceTheHandOfFate);
-                spellCast = true;
+                    this.triggerSugarFrenzy()
+                    spellCast = true;
                 }
             }
         }
@@ -446,6 +449,22 @@ class AutoPlayer {
                 towers.sell(towers.amount - targetTowerCount);
                 this.grimoire.computeMagicM(); // Boy is this cheating, but boy does it simplify coding this
                 this.grimoire.castSpell(this.forceTheHandOfFate);
+            }
+        }
+    }
+
+
+    // Sugar Frenzy triples clicking power for 1 hour, but only once per ascension
+    triggerSugarFrenzy() {
+        if (!this.autoSugarFrenzy)
+            return
+        
+        const sugarFrenzyUpgrade = Game.UpgradesById[452];
+        if (!sugarFrenzyUpgrade.bought) {
+            const upgradeSwitch = document.querySelector('.upgrade[data-id="452"]');
+            if (upgradeSwitch && upgradeSwitch.classList.contains('enabled')) {
+                this.log("Activating Sugar Frenzy!");
+                upgradeSwitch.click();
             }
         }
     }
