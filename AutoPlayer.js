@@ -478,7 +478,7 @@ class AutoPlayer {
     triggerSugarFrenzy() {
         if (!this.autoSugarFrenzy)
             return
-        
+
         const sugarFrenzyUpgrade = Game.UpgradesById[452];
         if (!sugarFrenzyUpgrade.bought) {
             const upgradeSwitch = document.querySelector('.upgrade[data-id="452"]');
