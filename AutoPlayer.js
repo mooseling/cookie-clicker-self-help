@@ -7,6 +7,7 @@ class AutoPlayer {
     autoHarvestLumps = true;
     autoClickFortune = true;
     autoWrinkle = false;
+    autoPledge = true;
     autoEndGame = true;
     autoSugarFrenzy = true;
 
@@ -140,6 +141,8 @@ class AutoPlayer {
             this.harvestRipeLumps();
         if (this.autoWrinkle)
             this.popWrinklers();
+        if (this.autoPledge)
+            this.maintainElderPledge();
         if (this.autoEndGame)
             this.#endGameLoop()
 
@@ -285,6 +288,23 @@ class AutoPlayer {
         if (activeWrinklers.length > 0) {
             this.log("Popping a wrinkler")
             Game.PopRandomWrinkler();
+        }
+    }
+
+
+    // Elder Pledge pauses the Grandmapocalypse for 1 hour, price capped at ~4 trillion
+    // I used to user Elder Covenant, which is permanent, but reduces CpS by 5%
+    // I didn't realise Pledge was price capped!
+    maintainElderPledge() {
+        const pledgeUpgrade = Game.UpgradesById[74];
+        if (pledgeUpgrade.bought) {
+            return;
+        }
+
+        const pledgeSwitch = document.querySelector('.upgrade[data-id="74"]');
+        if (pledgeSwitch && pledgeSwitch.classList.contains('enabled')) {
+            this.log("Activating Elder Pledge");
+            pledgeSwitch.click();
         }
     }
 
