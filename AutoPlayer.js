@@ -1,15 +1,15 @@
 class AutoPlayer {
 
     autoClick = true;
-    autoClickShimmers = true;
+    autoClickShimmers = true; // Golden cookies and reindeer
     autoChristmas = true;
-    autoGodzamok = true;
+    autoGodzamok = true;      // Sell buildings to get Godzamok bonus constantly
     autoHarvestLumps = true;
-    autoClickFortune = true;
-    autoWrinkle = false;
-    autoPledge = true;
+    autoClickFortune = true;  // Upgrades that appear in the news ticker
+    autoWrinkle = false;      // Pop Wrinklers to unlock stuff in the early game
+    autoPledge = true;        // Stay out of Grandmapocalypse with Elder Pledge
     autoEndGame = true;
-    autoSugarFrenzy = true;
+    autoSugarFrenzy = true;   // Sugar Frenzy is a big bonus, once per ascension
 
     fastLoopTime = 20; // We used to do 0, but the page is freezing. Possibly from other extensions. Anyway, nice to control this rate.
     godzamokFarmCountNormal = 950;
