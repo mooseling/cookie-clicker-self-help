@@ -240,20 +240,34 @@ class AutoPlayer {
             else
                 targetFarmCount = this.godzamokFarmCountNormal;
         }
+        const targetMineCount = targetFarmCount - 50
+        const targetFactoryCount = targetMineCount - 50
 
+        // The GUI only shows the buff from selling the farms, but that's only because the GUI doesn't update!
+        // Selling more buildings DOES increase the multiplier!
         const farm = Game.Objects.Farm;
+        const mine = Game.Objects.Mine;
+        const factory = Game.Objects.Factory;
 
         // If the game is in sell-mode, it won't buy things. So we'll just switch it over briefly...
         let inSellMode = Game.buyMode === -1;
         if (inSellMode)
-            Game.buyMode === 1;
+            Game.buyMode = 1;
 
         if (farm.amount < targetFarmCount)
             farm.buy(targetFarmCount - farm.amount);
+        if (mine.amount < targetMineCount - 50)
+            mine.buy(targetMineCount - mine.amount);
+        if (factory.amount < targetFactoryCount - 50)
+            factory.buy(targetFactoryCount - factory.amount);
 
         farm.sell(-1); // -1 means all
+        mine.sell(-1);
+        factory.sell(-1);
 
         farm.buy(targetFarmCount);
+        mine.buy(targetMineCount);
+        factory.buy(targetFactoryCount);
 
         if (inSellMode)
             Game.buyMode = -1; // ...and reset it afterwards
