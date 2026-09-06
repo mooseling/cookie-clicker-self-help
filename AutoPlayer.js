@@ -6,8 +6,8 @@ class AutoPlayer {
     autoGodzamok = true;      // Sell buildings to get Godzamok bonus constantly
     autoHarvestLumps = true;
     autoClickFortune = true;  // Upgrades that appear in the news ticker
-    autoWrinkle = false;      // Pop Wrinklers to unlock stuff in the early game
-    autoPledge = true;        // Stay out of Grandmapocalypse with Elder Pledge
+    autoWrinkle = true;      // Pop Wrinklers to unlock stuff in the early game
+    autoPledge = false;        // Stay out of Grandmapocalypse with Elder Pledge
     autoEndGame = true;
     autoSugarFrenzy = true;   // Sugar Frenzy is a big bonus, once per ascension
 
