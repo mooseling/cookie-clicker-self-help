@@ -16,8 +16,9 @@ class AutoPlayer {
     godzamokFarmCountEndGame = 1000;
 
     saves = [];
-
     shimmersClicked = 0;
+    cookiesClicked = Game.cookies;
+    cookieCountTimestamp = Date.now() // ms
 
     running;
     fastLoopTimeout;
@@ -159,7 +160,15 @@ class AutoPlayer {
             return;
         }
 
+        const cookiesClickedNow = Game.cookies;
+        const timestamp = Date.now()
+        const minutesSinceLastStamp = (timestamp - this.cookieCountTimestamp) / 60_000
+        const cookiesPerMinute = (cookiesClickedNow - this.cookiesClicked) / minutesSinceLastStamp
+        this.cookiesClicked = cookiesClickedNow
+        this.cookieCountTimestamp = timestamp
+
         this.log('Cookies: ' + Game.cookies);
+        this.log('Cookies per minute: ' + cookiesPerMinute)
 
         const magic = this.grimoire.magic;
         this.log('Magic: ' + magic);
