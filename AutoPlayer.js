@@ -298,10 +298,18 @@ class AutoPlayer {
     // Popping wrinklers can help unlock eggs and halloween cookies
     // Each wrinkler slot has its own chance to spawn, so immediately popping them maximises pops
     popWrinklers() {
-        const activeWrinklers = Game.wrinklers.filter(wrinkler => wrinkler.phase === 2);
-        if (activeWrinklers.length > 0) {
-            this.log("Popping a wrinkler")
-            Game.PopRandomWrinkler();
+        for (wrinkler of Game.wrinklers) {
+            if (wrinkler.type === 1) {
+                this.log("A shiny wrinkler! Leaving it for player to see.")
+                continue;
+            }
+
+            // We filter out wrinklers that haven't sucked anything yet.
+            // Very unlinkely, but if it would happen we wouldn't get Wrinkler Ambergris
+            if (wrinkler.phase === 2 && wrinkler.sucked > 0.5) {
+                this.log("Popping a wrinkler");
+                wrinkler.hp -= 10; // This is what Gae=me.PopRandomWrinkler does
+            }
         }
     }
 
