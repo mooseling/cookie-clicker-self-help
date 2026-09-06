@@ -195,11 +195,13 @@ class AutoPlayer {
             return;
         }
 
+        // Godzamok buff lasts 10 seconds
+        const nextTime = Date.now() + 10_300 // 10.3 seconds later
+
         if (this.autoGodzamok)
             this.triggerGodzamok();
 
-        // Godzamok lasts 10 seconds, and we really want to rinse it, so timeout for 10.5s
-        this.godzamokLoopTimeout = setTimeout(this.#godzamokLoop.bind(this), 10500);
+        this.godzamokLoopTimeout = setTimeout(this.#godzamokLoop.bind(this), nextTime - Date.now());
     }
 
 
