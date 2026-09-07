@@ -263,13 +263,26 @@ class AutoPlayer {
         if (farm.amount < targetFarmCount)
             farm.buy(targetFarmCount - farm.amount);
 
-        for (let i = 0; i < this.farmSellAmount; i++) {
-            farm.sell(-1); // -1 means all
-            farm.buy(targetFarmCount);
+        let farmSellCountTarget = this.farmSellAmount;
+        let farmSellCount = 0;
+
+        function sellFarms() {
+            // Batch the farm selling with timeouts, to stop the game lagging
+            if (farmSellCount < farmSellCountTarget) {
+                for (let i = 0; i < 50; i++) {
+                    farm.sell(-1); // -1 means all
+                    farm.buy(targetFarmCount);
+                }
+                farmSellCount += 50;
+                setTimeout(sellFarms, 0);
+            } else {
+                // Done selling, any cleanup happens now
+                if (inSellMode)
+                    Game.buyMode = -1; // ...and reset it afterwards
+            }
         }
 
-        if (inSellMode)
-            Game.buyMode = -1; // ...and reset it afterwards
+        sellFarms();
     }
 
 
