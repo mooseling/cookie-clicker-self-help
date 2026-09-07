@@ -14,7 +14,7 @@ class AutoPlayer {
     fastLoopTime = 20; // We used to do 0, but the page is freezing. Possibly from other extensions. Anyway, nice to control this rate.
     godzamokFarmCountNormal = 950;
     godzamokFarmCountEndGame = 1000;
-    farmSellAmount = 2000;
+    farmSellAmount = 3000;
 
     saves = [];
     shimmersClicked = 0;
