@@ -310,7 +310,7 @@ class AutoPlayer {
     // Popping wrinklers can help unlock eggs and halloween cookies
     // Each wrinkler slot has its own chance to spawn, so immediately popping them maximises pops
     popWrinklers() {
-        for (wrinkler of Game.wrinklers) {
+        for (const wrinkler of Game.wrinklers) {
             if (wrinkler.type === 1) {
                 this.log("A shiny wrinkler! Leaving it for player to see.")
                 continue;
